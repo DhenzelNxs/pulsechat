@@ -23,4 +23,15 @@ Full technical specification and work breakdown: [`docs/SPEC.md`](docs/SPEC.md).
 
 ## Local development
 
-Setup instructions land here once card 1 (scaffolding) is merged.
+Requirements: Node.js ≥ 20 and [pnpm](https://pnpm.io).
+
+```bash
+pnpm install        # installs all workspaces (apps/web, apps/api, packages/shared)
+pnpm run typecheck  # tsc --noEmit across every workspace
+pnpm run lint        # eslint .
+pnpm run format      # prettier --write .
+```
+
+`apps/api` and `apps/web` each get their own `dev`/`build` scripts as they're built out in
+cards 2 and 6 — see [`docs/SPEC.md`](docs/SPEC.md) §4 for the monorepo layout and §15 for the
+full card-by-card roadmap.

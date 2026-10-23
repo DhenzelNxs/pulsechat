@@ -1,0 +1,15 @@
+{
+  "name": "@pulsechat/shared",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Zod schemas and TypeScript types shared between apps/web and apps/api.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

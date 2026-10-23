@@ -109,7 +109,7 @@ pulsechat/
 ├── docs/
 │   └── SPEC.md                 # this file
 ├── .github/workflows/ci.yml
-├── package.json                # npm workspaces root
+├── package.json                # pnpm workspaces root
 └── README.md
 ```
 
@@ -249,7 +249,7 @@ durable (messages, reads) goes through the REST API first.
 ## 11. CI/CD
 
 `.github/workflows/ci.yml` runs on every PR into `master`:
-1. Install (npm workspaces, cached).
+1. Install (pnpm workspaces, cached).
 2. Lint (`eslint .`).
 3. Typecheck (`tsc --noEmit` in both apps).
 4. Test (`apps/api` with `mongodb-memory-server`, `apps/web` with Vitest).
@@ -285,7 +285,7 @@ Two separate Vercel projects pointing at the same GitHub repo, each with its own
 Directory** setting so they build independently:
 
 1. **API project** — Root Directory `apps/api`, framework preset "Other", build command
-   `npm run build`, output handled by `@vercel/node` via `apps/api/vercel.json`. Set all API env
+   `pnpm run build`, output handled by `@vercel/node` via `apps/api/vercel.json`. Set all API env
    vars from §12 in the Vercel dashboard.
 2. **Web project** — Root Directory `apps/web`, framework preset "Vite". Set `VITE_API_BASE_URL`
    to the API project's production URL once it exists, and the Pusher public env vars.
@@ -311,7 +311,7 @@ link the preview URL in the PR description for manual QA before merging.
 Each card is scoped to be one reviewable PR. Don't start card *n+1* before card *n* is merged —
 the point is an incremental, readable history.
 
-1. **Monorepo scaffolding** — npm workspaces, `apps/web`, `apps/api`, `packages/shared`,
+1. **Monorepo scaffolding** — pnpm workspaces, `apps/web`, `apps/api`, `packages/shared`,
    ESLint/Prettier/TS configs, root `README.md`, `.gitignore`, MIT `LICENSE`.
 2. **API skeleton** — Express app, MongoDB connection (`config/db.ts`), health-check route,
    centralized error-handling middleware, pino logging.
