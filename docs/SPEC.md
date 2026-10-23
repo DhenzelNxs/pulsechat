@@ -64,7 +64,7 @@ loss, just a client that needs to re-sync on reconnect.
 | Auth | JWT (access + refresh) + bcrypt | Industry-standard, explainable in an interview |
 | Realtime transport | Pusher Channels (free tier) | Vercel serverless can't hold sockets open; this is the correct fix, not a workaround |
 | Validation | Zod | Shared schemas between layers |
-| Testing (API) | Jest + Supertest + mongodb-memory-server | Real Mongo engine in-memory, no mocked queries |
+| Testing (API) | Vitest + Supertest + mongodb-memory-server | Real Mongo engine in-memory, no mocked queries |
 | Testing (frontend) | Vitest + React Testing Library | Component-level correctness |
 | E2E | Playwright | One real happy-path test: register → send message → see it live |
 | CI | GitHub Actions | Lint + typecheck + test gate on every PR |
@@ -235,7 +235,7 @@ durable (messages, reads) goes through the REST API first.
 
 ## 10. Testing strategy
 
-- **API integration tests** (Jest + Supertest): spin up `mongodb-memory-server` in
+- **API integration tests** (Vitest + Supertest): spin up `mongodb-memory-server` in
   `beforeAll`, exercise real routes end-to-end (register → login → create room → send message →
   fetch paginated history), assert on actual persisted documents. No mocked `Model.find`.
 - **API unit tests**: pure service-layer logic (token generation, mention parsing, pagination
