@@ -18,7 +18,7 @@ Full technical specification and work breakdown: [`docs/SPEC.md`](docs/SPEC.md).
 - **API**: Node.js, Express, TypeScript, Mongoose
 - **Database**: MongoDB Atlas
 - **Real-time**: Pusher Channels
-- **Testing**: Jest, Supertest, mongodb-memory-server, Vitest, Playwright
+- **Testing**: Vitest, Supertest, mongodb-memory-server, Playwright
 - **Hosting**: Vercel (frontend and API as separate projects from this monorepo)
 
 ## Local development

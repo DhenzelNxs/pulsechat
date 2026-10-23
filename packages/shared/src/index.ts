@@ -1,3 +1,3 @@
-// Placeholder entry point. Shared Zod schemas and types land alongside the
-// features that need them (auth in card 3, rooms/messages in card 4, etc.).
+// Placeholder entry point. Shared Zod schemas and types land here once a
+// second consumer (the frontend, from card 6 onward) actually needs them.
 export {};

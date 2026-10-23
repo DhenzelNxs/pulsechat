@@ -1,5 +1,11 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+nodeLinker: hoisted
 allowBuilds:
+  '@parcel/watcher': true
+  '@swc/core': true
+  bcrypt: true
   esbuild: true
+  mongodb-memory-server: true
+  unrs-resolver: true
