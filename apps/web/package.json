@@ -1,0 +1,12 @@
+{
+  "name": "@pulsechat/web",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Vite + React + TypeScript frontend — see docs/SPEC.md.",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
