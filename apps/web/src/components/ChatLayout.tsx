@@ -2,12 +2,15 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { RoomList } from '../features/rooms/RoomList';
 import { ThemeToggle } from './ThemeToggle';
 import { useLogout } from '../features/auth/useLogout';
+import { useSession } from '../features/auth/useSession';
+import { displayName, initials } from '../lib/displayName';
 
 export function ChatLayout() {
   const location = useLocation();
   const hasActiveRoom = location.pathname.startsWith('/rooms/');
   const navigate = useNavigate();
   const logout = useLogout();
+  const { data: currentUser } = useSession();
 
   const handleLogout = () => {
     logout.mutate(undefined, { onSuccess: () => navigate('/login') });
@@ -21,15 +24,27 @@ export function ChatLayout() {
         }`}
       >
         <RoomList />
-        <div className="flex items-center justify-between border-t border-slate-200 p-3 dark:border-slate-700">
-          <ThemeToggle />
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100"
-          >
-            Log out
-          </button>
+        <div className="border-t border-slate-200 dark:border-slate-700">
+          {currentUser && (
+            <div className="flex items-center gap-2 px-3 pt-3">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white dark:bg-slate-100 dark:text-slate-900">
+                {initials(currentUser)}
+              </span>
+              <span className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
+                {displayName(currentUser)}
+              </span>
+            </div>
+          )}
+          <div className="flex items-center justify-between p-3">
+            <ThemeToggle />
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100"
+            >
+              Log out
+            </button>
+          </div>
         </div>
       </aside>
 
