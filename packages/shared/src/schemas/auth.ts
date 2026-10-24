@@ -1,6 +1,17 @@
 import { z } from 'zod';
 
+function nameField(label: string) {
+  return z
+    .string()
+    .trim()
+    .min(1, `${label} is required`)
+    .max(50, `${label} must be at most 50 characters`)
+    .regex(/^[\p{L}][\p{L}\s'-]*$/u, `${label} may only contain letters, spaces, hyphens, and apostrophes`);
+}
+
 export const registerSchema = z.object({
+  firstName: nameField('First name'),
+  lastName: nameField('Last name'),
   username: z
     .string()
     .trim()

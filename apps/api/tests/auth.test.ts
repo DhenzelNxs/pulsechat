@@ -5,6 +5,8 @@ import { User } from '../src/models/User';
 const app = createApp();
 
 const validUser = {
+  firstName: 'Test',
+  lastName: 'User',
   username: 'testuser',
   email: 'test@example.com',
   password: 'password123',
@@ -16,6 +18,8 @@ describe('POST /api/auth/register', () => {
 
     expect(res.status).toBe(201);
     expect(res.body.user).toMatchObject({
+      firstName: validUser.firstName,
+      lastName: validUser.lastName,
       username: validUser.username,
       email: validUser.email,
       status: 'offline',
@@ -25,6 +29,25 @@ describe('POST /api/auth/register', () => {
 
     const stored = await User.findOne({ email: validUser.email }).select('+passwordHash');
     expect(stored?.passwordHash).not.toBe(validUser.password);
+  });
+
+  it('rejects a name containing digits', async () => {
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({ ...validUser, firstName: 'Test1' });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('VALIDATION_ERROR');
+  });
+
+  it('accepts accented letters in a name', async () => {
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({ ...validUser, firstName: 'José', lastName: "O'Neil-Souza" });
+
+    expect(res.status).toBe(201);
+    expect(res.body.user.firstName).toBe('José');
+    expect(res.body.user.lastName).toBe("O'Neil-Souza");
   });
 
   it('rejects a duplicate email', async () => {
