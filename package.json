@@ -3,11 +3,12 @@
   "private": true,
   "version": "0.0.0",
   "description": "Real-time chat application — pnpm workspaces monorepo root.",
-  "packageManager": "pnpm@12.6.0",
+  "packageManager": "pnpm@9.15.0",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
+    "postinstall": "pnpm --filter @pulsechat/shared run build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

@@ -2,16 +2,24 @@ import mongoose from 'mongoose';
 import { env } from './env';
 import { logger } from './logger';
 
-export async function connectDB(): Promise<typeof mongoose> {
-  mongoose.connection.on('error', (error) => {
-    logger.error({ err: error }, 'MongoDB connection error');
-  });
+let connectionPromise: Promise<typeof mongoose> | null = null;
 
-  const connection = await mongoose.connect(env.MONGODB_URI);
-  logger.info('Connected to MongoDB');
-  return connection;
+export function connectDB(): Promise<typeof mongoose> {
+  if (!connectionPromise) {
+    mongoose.connection.on('error', (error) => {
+      logger.error({ err: error }, 'MongoDB connection error');
+    });
+
+    connectionPromise = mongoose.connect(env.MONGODB_URI).then((connection) => {
+      logger.info('Connected to MongoDB');
+      return connection;
+    });
+  }
+
+  return connectionPromise;
 }
 
 export async function disconnectDB(): Promise<void> {
   await mongoose.disconnect();
+  connectionPromise = null;
 }
