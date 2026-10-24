@@ -35,3 +35,7 @@ export function sendMessage(roomId: string, content: string): Promise<{ message:
     body: JSON.stringify({ content }),
   });
 }
+
+export function searchMessages(roomId: string, q: string): Promise<{ messages: Message[] }> {
+  return apiFetch(`/api/rooms/${roomId}/messages/search?q=${encodeURIComponent(q)}`);
+}

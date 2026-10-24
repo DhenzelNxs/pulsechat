@@ -1,8 +1,12 @@
+import { parseMentionCandidates } from '@pulsechat/shared';
 import { Message, type MessageDocument } from '../../models/Message';
+import { User } from '../../models/User';
 import { pusher } from '../../config/pusher';
 import { logger } from '../../config/logger';
 import { getRoomForUser } from '../rooms/rooms.service';
 import type { ListMessagesQuery } from './messages.validation';
+
+const SEARCH_RESULT_LIMIT = 50;
 
 export interface MessagePage {
   messages: MessageDocument[];
@@ -29,17 +33,40 @@ export async function listMessages(
   return { messages, nextCursor };
 }
 
+async function resolveMentions(content: string, memberIds: string[]): Promise<string[]> {
+  const candidates = parseMentionCandidates(content);
+  if (candidates.length === 0) {
+    return [];
+  }
+
+  const lowerCandidates = new Set(candidates.map((candidate) => candidate.toLowerCase()));
+  const members = await User.find({ _id: { $in: memberIds } }, { username: 1 });
+
+  return members
+    .filter((member) => lowerCandidates.has(member.username.toLowerCase()))
+    .map((member) => member._id.toString());
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export async function sendMessage(
   userId: string,
   roomId: string,
   content: string,
 ): Promise<MessageDocument> {
   const room = await getRoomForUser(userId, roomId);
+  const mentions = await resolveMentions(
+    content,
+    room.memberIds.map((memberId) => memberId.toString()),
+  );
 
   const message = await Message.create({
     roomId,
     senderId: userId,
     content,
+    mentions,
   });
 
   room.lastMessageAt = message.createdAt;
@@ -52,4 +79,18 @@ export async function sendMessage(
   }
 
   return message;
+}
+
+export async function searchMessages(
+  userId: string,
+  roomId: string,
+  query: string,
+): Promise<MessageDocument[]> {
+  await getRoomForUser(userId, roomId);
+
+  const pattern = new RegExp(escapeRegExp(query), 'i');
+
+  return Message.find({ roomId, content: pattern })
+    .sort({ createdAt: -1 })
+    .limit(SEARCH_RESULT_LIMIT);
 }

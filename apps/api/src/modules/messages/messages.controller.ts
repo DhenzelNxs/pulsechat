@@ -2,7 +2,7 @@ import type { Response } from 'express';
 import type { AuthenticatedRequest } from '../../middleware/requireAuth';
 import type { ValidatedQueryRequest } from '../../middleware/validate';
 import * as messagesService from './messages.service';
-import type { ListMessagesQuery, SendMessageInput } from './messages.validation';
+import type { ListMessagesQuery, SearchMessagesQuery, SendMessageInput } from './messages.validation';
 
 export async function list(
   req: AuthenticatedRequest & ValidatedQueryRequest<ListMessagesQuery>,
@@ -23,4 +23,16 @@ export async function send(req: AuthenticatedRequest & { body: SendMessageInput 
     req.body.content,
   );
   res.status(201).json({ message });
+}
+
+export async function search(
+  req: AuthenticatedRequest & ValidatedQueryRequest<SearchMessagesQuery>,
+  res: Response,
+) {
+  const messages = await messagesService.searchMessages(
+    req.userId as string,
+    req.params.id as string,
+    (req.validatedQuery as SearchMessagesQuery).q,
+  );
+  res.status(200).json({ messages });
 }
