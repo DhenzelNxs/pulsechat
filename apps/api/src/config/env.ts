@@ -9,6 +9,10 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET: z.string().min(1, 'JWT_REFRESH_SECRET is required'),
   JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
+  PUSHER_APP_ID: z.string().min(1, 'PUSHER_APP_ID is required'),
+  PUSHER_KEY: z.string().min(1, 'PUSHER_KEY is required'),
+  PUSHER_SECRET: z.string().min(1, 'PUSHER_SECRET is required'),
+  PUSHER_CLUSTER: z.string().min(1, 'PUSHER_CLUSTER is required'),
   CORS_ORIGIN: z
     .string()
     .default('http://localhost:5173')

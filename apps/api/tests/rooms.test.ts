@@ -1,29 +1,14 @@
 import request from 'supertest';
 import { createApp } from '../src/app';
+import { pusher } from '../src/config/pusher';
+import { authed, registerAndLogin } from './helpers';
 
 const app = createApp();
 
-async function registerAndLogin(username: string) {
-  const user = { username, email: `${username}@example.com`, password: 'password123' };
-  await request(app).post('/api/auth/register').send(user);
-  const loginRes = await request(app)
-    .post('/api/auth/login')
-    .send({ email: user.email, password: user.password });
-
-  return {
-    accessToken: loginRes.body.accessToken as string,
-    userId: loginRes.body.user._id as string,
-  };
-}
-
-function authed(accessToken: string) {
-  return { Authorization: `Bearer ${accessToken}` };
-}
-
 describe('POST /api/rooms', () => {
   it('creates a DM room including the creator', async () => {
-    const alice = await registerAndLogin('alice');
-    const bob = await registerAndLogin('bob');
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
 
     const res = await request(app)
       .post('/api/rooms')
@@ -36,9 +21,9 @@ describe('POST /api/rooms', () => {
   });
 
   it('creates a group room with a name', async () => {
-    const alice = await registerAndLogin('alice');
-    const bob = await registerAndLogin('bob');
-    const carol = await registerAndLogin('carol');
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
+    const carol = await registerAndLogin(app, 'carol');
 
     const res = await request(app)
       .post('/api/rooms')
@@ -51,8 +36,8 @@ describe('POST /api/rooms', () => {
   });
 
   it('rejects a group without a name', async () => {
-    const alice = await registerAndLogin('alice');
-    const bob = await registerAndLogin('bob');
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
 
     const res = await request(app)
       .post('/api/rooms')
@@ -63,9 +48,9 @@ describe('POST /api/rooms', () => {
   });
 
   it('rejects a DM with more than two total members', async () => {
-    const alice = await registerAndLogin('alice');
-    const bob = await registerAndLogin('bob');
-    const carol = await registerAndLogin('carol');
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
+    const carol = await registerAndLogin(app, 'carol');
 
     const res = await request(app)
       .post('/api/rooms')
@@ -76,7 +61,7 @@ describe('POST /api/rooms', () => {
   });
 
   it('rejects a nonexistent member id', async () => {
-    const alice = await registerAndLogin('alice');
+    const alice = await registerAndLogin(app, 'alice');
 
     const res = await request(app)
       .post('/api/rooms')
@@ -97,9 +82,9 @@ describe('POST /api/rooms', () => {
 
 describe('GET /api/rooms', () => {
   it('lists only rooms the user belongs to, newest activity first', async () => {
-    const alice = await registerAndLogin('alice');
-    const bob = await registerAndLogin('bob');
-    const carol = await registerAndLogin('carol');
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
+    const carol = await registerAndLogin(app, 'carol');
 
     const roomWithBob = await request(app)
       .post('/api/rooms')
@@ -127,8 +112,8 @@ describe('GET /api/rooms', () => {
 
 describe('GET /api/rooms/:id', () => {
   it('returns room details for a member', async () => {
-    const alice = await registerAndLogin('alice');
-    const bob = await registerAndLogin('bob');
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
 
     const room = await request(app)
       .post('/api/rooms')
@@ -144,9 +129,9 @@ describe('GET /api/rooms/:id', () => {
   });
 
   it('rejects a non-member', async () => {
-    const alice = await registerAndLogin('alice');
-    const bob = await registerAndLogin('bob');
-    const carol = await registerAndLogin('carol');
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
+    const carol = await registerAndLogin(app, 'carol');
 
     const room = await request(app)
       .post('/api/rooms')
@@ -161,7 +146,7 @@ describe('GET /api/rooms/:id', () => {
   });
 
   it('returns 400 for a malformed room id', async () => {
-    const alice = await registerAndLogin('alice');
+    const alice = await registerAndLogin(app, 'alice');
 
     const res = await request(app).get('/api/rooms/not-an-id').set(authed(alice.accessToken));
 
@@ -169,7 +154,7 @@ describe('GET /api/rooms/:id', () => {
   });
 
   it('returns 404 for a well-formed but nonexistent room id', async () => {
-    const alice = await registerAndLogin('alice');
+    const alice = await registerAndLogin(app, 'alice');
 
     const res = await request(app)
       .get('/api/rooms/000000000000000000000000')
@@ -181,8 +166,8 @@ describe('GET /api/rooms/:id', () => {
 
 describe('messages', () => {
   it('sends a message and advances the room lastMessageAt', async () => {
-    const alice = await registerAndLogin('alice');
-    const bob = await registerAndLogin('bob');
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
 
     const room = await request(app)
       .post('/api/rooms')
@@ -204,12 +189,18 @@ describe('messages', () => {
     expect(new Date(roomRes.body.room.lastMessageAt).getTime()).toBeGreaterThanOrEqual(
       new Date(room.body.room.createdAt).getTime(),
     );
+
+    expect(pusher.trigger).toHaveBeenCalledWith(
+      `private-room-${room.body.room._id}`,
+      'message:new',
+      expect.objectContaining({ content: 'hey bob' }),
+    );
   });
 
   it('rejects sending a message as a non-member', async () => {
-    const alice = await registerAndLogin('alice');
-    const bob = await registerAndLogin('bob');
-    const carol = await registerAndLogin('carol');
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
+    const carol = await registerAndLogin(app, 'carol');
 
     const room = await request(app)
       .post('/api/rooms')
@@ -225,8 +216,8 @@ describe('messages', () => {
   });
 
   it('rejects empty content', async () => {
-    const alice = await registerAndLogin('alice');
-    const bob = await registerAndLogin('bob');
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
 
     const room = await request(app)
       .post('/api/rooms')
@@ -242,8 +233,8 @@ describe('messages', () => {
   });
 
   it('paginates message history with a cursor, newest first', async () => {
-    const alice = await registerAndLogin('alice');
-    const bob = await registerAndLogin('bob');
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
 
     const room = await request(app)
       .post('/api/rooms')
