@@ -3,7 +3,7 @@ import type { AuthenticatedRequest } from '../../middleware/requireAuth';
 import { AppError } from '../../errors/AppError';
 import * as authService from './auth.service';
 import { clearRefreshCookie, getRefreshCookie, setRefreshCookie } from './auth.cookies';
-import type { LoginInput, RegisterInput } from './auth.validation';
+import type { LoginInput, RegisterInput } from '@pulsechat/shared';
 
 export async function register(req: Request<unknown, unknown, RegisterInput>, res: Response) {
   const user = await authService.registerUser(req.body);

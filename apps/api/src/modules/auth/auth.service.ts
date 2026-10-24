@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import { User, type UserDocument } from '../../models/User';
 import { AppError } from '../../errors/AppError';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from './auth.tokens';
-import type { LoginInput, RegisterInput } from './auth.validation';
+import type { LoginInput, RegisterInput } from '@pulsechat/shared';
 
 const BCRYPT_COST_FACTOR = 12;
 
