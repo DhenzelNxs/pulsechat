@@ -1,4 +1,5 @@
 import { useState, type KeyboardEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSendMessage } from './useSendMessage';
 
 interface MessageInputProps {
@@ -8,6 +9,7 @@ interface MessageInputProps {
 }
 
 export function MessageInput({ roomId, onTyping, onStopTyping }: MessageInputProps) {
+  const { t } = useTranslation();
   const [content, setContent] = useState('');
   const sendMessage = useSendMessage(roomId);
 
@@ -43,7 +45,7 @@ export function MessageInput({ roomId, onTyping, onStopTyping }: MessageInputPro
           }
         }}
         onKeyDown={handleKeyDown}
-        placeholder="Write a message…"
+        placeholder={t('chat.writeMessage')}
         rows={1}
         className="flex-1 resize-none rounded border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
       />
@@ -53,7 +55,7 @@ export function MessageInput({ roomId, onTyping, onStopTyping }: MessageInputPro
         disabled={!content.trim() || sendMessage.isPending}
         className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
       >
-        Send
+        {t('chat.send')}
       </button>
     </div>
   );

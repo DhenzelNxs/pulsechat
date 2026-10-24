@@ -32,6 +32,8 @@ async function registerAndLogin(
 test('register two users, DM, and see a sent message appear for the recipient', async ({ browser }) => {
   const contextA = await browser.newContext();
   const contextB = await browser.newContext();
+  await contextA.addInitScript(() => window.localStorage.setItem('pulsechat-language', 'en'));
+  await contextB.addInitScript(() => window.localStorage.setItem('pulsechat-language', 'en'));
   const pageA = await contextA.newPage();
   const pageB = await contextB.newPage();
 

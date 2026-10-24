@@ -1,11 +1,14 @@
+import { useTranslation } from 'react-i18next';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { RoomList } from '../features/rooms/RoomList';
 import { ThemeToggle } from './ThemeToggle';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { useLogout } from '../features/auth/useLogout';
 import { useSession } from '../features/auth/useSession';
 import { displayName, initials } from '../lib/displayName';
 
 export function ChatLayout() {
+  const { t } = useTranslation();
   const location = useLocation();
   const hasActiveRoom = location.pathname.startsWith('/rooms/');
   const navigate = useNavigate();
@@ -35,14 +38,17 @@ export function ChatLayout() {
               </span>
             </div>
           )}
-          <div className="flex items-center justify-between p-3">
-            <ThemeToggle />
+          <div className="flex items-center justify-between gap-2 p-3">
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <LanguageSwitcher />
+            </div>
             <button
               type="button"
               onClick={handleLogout}
               className="text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100"
             >
-              Log out
+              {t('logout')}
             </button>
           </div>
         </div>

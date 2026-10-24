@@ -1,0 +1,86 @@
+{
+  "common": {
+    "loading": "Loading…"
+  },
+  "auth": {
+    "login": {
+      "title": "Log in to PulseChat",
+      "accountCreated": "Account created. You can log in now.",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Log in",
+      "submitPending": "Logging in…",
+      "noAccount": "No account?",
+      "registerLink": "Register",
+      "genericError": "Something went wrong"
+    },
+    "register": {
+      "title": "Create your account",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "username": "Username",
+      "usernamePlaceholder": "e.g. dhenzel_lima",
+      "usernameHelp": "This is how people find and @mention you — letters, numbers, and underscores only, not your real name.",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Create account",
+      "submitPending": "Creating account…",
+      "haveAccount": "Already have an account?",
+      "loginLink": "Log in",
+      "genericError": "Something went wrong"
+    }
+  },
+  "chat": {
+    "chats": "Chats",
+    "newChat": "New chat",
+    "noChatsYet": "No chats yet. Start one above.",
+    "loadingChats": "Loading chats…",
+    "selectOrStart": "Select a chat or start a new one.",
+    "loadingChat": "Loading chat…",
+    "chatNotFound": "Chat not found.",
+    "search": "Search",
+    "hideSearch": "Hide search",
+    "online": "Online",
+    "offline": "Offline",
+    "typingOne": "{{name}} is typing…",
+    "typingTwo": "{{name1}} and {{name2}} are typing…",
+    "typingMany": "{{count}} people are typing…",
+    "sent": "Sent",
+    "seen": "Seen",
+    "noMessagesYet": "No messages yet. Say hi!",
+    "loadingMessages": "Loading messages…",
+    "loadingOlderMessages": "Loading older messages…",
+    "writeMessage": "Write a message…",
+    "send": "Send",
+    "searchInChat": "Search in this chat…",
+    "searching": "Searching…",
+    "noResults": "No messages match \"{{query}}\".",
+    "close": "Close"
+  },
+  "newChatModal": {
+    "title": "New chat",
+    "close": "Close",
+    "directMessage": "Direct message",
+    "group": "Group",
+    "groupNamePlaceholder": "Group name",
+    "searchPlaceholder": "Search by username",
+    "noUsersFound": "No users found",
+    "startChat": "Start chat",
+    "creating": "Creating…",
+    "error": "Could not create the chat. Try again."
+  },
+  "theme": {
+    "toggleAria": "Toggle dark mode",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "language": {
+    "label": "Language",
+    "pt": "Português",
+    "en": "English"
+  },
+  "protectedRoute": {
+    "loading": "Loading..."
+  },
+  "logout": "Log out"
+}

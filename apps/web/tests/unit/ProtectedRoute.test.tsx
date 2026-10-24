@@ -26,6 +26,14 @@ describe('ProtectedRoute', () => {
     vi.restoreAllMocks();
   });
 
+  it('shows the Portuguese (default) loading text while the session is resolving', () => {
+    vi.spyOn(authApi, 'refreshAccessToken').mockReturnValue(new Promise(() => {}));
+
+    renderProtected();
+
+    expect(screen.getByText('Carregando...')).toBeInTheDocument();
+  });
+
   it('redirects to /login when there is no session', async () => {
     vi.spyOn(authApi, 'refreshAccessToken').mockRejectedValue(new Error('no session'));
 

@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSession } from '../auth/useSession';
 import { useMessages } from './useMessages';
 import { useMarkRoomRead } from './useMarkRoomRead';
@@ -12,6 +13,7 @@ interface MessageListProps {
 const LOAD_MORE_THRESHOLD_PX = 100;
 
 export function MessageList({ roomId, otherMemberId }: MessageListProps) {
+  const { t } = useTranslation();
   const { data: user } = useSession();
   const messages = useMessages(roomId);
   const { mutate: markRead } = useMarkRoomRead(roomId);
@@ -56,11 +58,11 @@ export function MessageList({ roomId, otherMemberId }: MessageListProps) {
   };
 
   if (messages.isLoading) {
-    return <p className="p-4 text-sm text-slate-400">Loading messages…</p>;
+    return <p className="p-4 text-sm text-slate-400">{t('chat.loadingMessages')}</p>;
   }
 
   if (ordered.length === 0) {
-    return <p className="p-4 text-sm text-slate-400">No messages yet. Say hi!</p>;
+    return <p className="p-4 text-sm text-slate-400">{t('chat.noMessagesYet')}</p>;
   }
 
   const lastMessage = ordered[ordered.length - 1];
@@ -76,7 +78,9 @@ export function MessageList({ roomId, otherMemberId }: MessageListProps) {
       className="flex-1 space-y-2 overflow-y-auto p-4"
     >
       {messages.isFetchingNextPage && (
-        <p className="pb-2 text-center text-xs text-slate-400">Loading older messages…</p>
+        <p className="pb-2 text-center text-xs text-slate-400">
+          {t('chat.loadingOlderMessages')}
+        </p>
       )}
       {ordered.map((message) => {
         const isOwn = message.senderId === user?._id;
@@ -99,7 +103,9 @@ export function MessageList({ roomId, otherMemberId }: MessageListProps) {
         );
       })}
       {showSeenIndicator && (
-        <p className="pr-1 text-right text-xs text-slate-400">{lastMessageSeen ? 'Seen' : 'Sent'}</p>
+        <p className="pr-1 text-right text-xs text-slate-400">
+          {lastMessageSeen ? t('chat.seen') : t('chat.sent')}
+        </p>
       )}
       <div ref={bottomRef} />
     </div>

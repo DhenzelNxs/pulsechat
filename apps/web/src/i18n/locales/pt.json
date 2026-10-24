@@ -1,0 +1,86 @@
+{
+  "common": {
+    "loading": "Carregando…"
+  },
+  "auth": {
+    "login": {
+      "title": "Entrar no PulseChat",
+      "accountCreated": "Conta criada. Você já pode entrar.",
+      "email": "E-mail",
+      "password": "Senha",
+      "submit": "Entrar",
+      "submitPending": "Entrando…",
+      "noAccount": "Não tem conta?",
+      "registerLink": "Cadastre-se",
+      "genericError": "Algo deu errado"
+    },
+    "register": {
+      "title": "Crie sua conta",
+      "firstName": "Nome",
+      "lastName": "Sobrenome",
+      "username": "Nome de usuário",
+      "usernamePlaceholder": "ex: dhenzel_lima",
+      "usernameHelp": "É assim que as pessoas te encontram e te mencionam com @ — apenas letras, números e sublinhado, não é seu nome real.",
+      "email": "E-mail",
+      "password": "Senha",
+      "submit": "Criar conta",
+      "submitPending": "Criando conta…",
+      "haveAccount": "Já tem uma conta?",
+      "loginLink": "Entrar",
+      "genericError": "Algo deu errado"
+    }
+  },
+  "chat": {
+    "chats": "Conversas",
+    "newChat": "Nova conversa",
+    "noChatsYet": "Nenhuma conversa ainda. Comece uma acima.",
+    "loadingChats": "Carregando conversas…",
+    "selectOrStart": "Selecione uma conversa ou inicie uma nova.",
+    "loadingChat": "Carregando conversa…",
+    "chatNotFound": "Conversa não encontrada.",
+    "search": "Pesquisar",
+    "hideSearch": "Ocultar pesquisa",
+    "online": "Online",
+    "offline": "Offline",
+    "typingOne": "{{name}} está digitando…",
+    "typingTwo": "{{name1}} e {{name2}} estão digitando…",
+    "typingMany": "{{count}} pessoas estão digitando…",
+    "sent": "Enviada",
+    "seen": "Vista",
+    "noMessagesYet": "Nenhuma mensagem ainda. Diga oi!",
+    "loadingMessages": "Carregando mensagens…",
+    "loadingOlderMessages": "Carregando mensagens antigas…",
+    "writeMessage": "Escreva uma mensagem…",
+    "send": "Enviar",
+    "searchInChat": "Pesquisar nesta conversa…",
+    "searching": "Pesquisando…",
+    "noResults": "Nenhuma mensagem encontrada para \"{{query}}\".",
+    "close": "Fechar"
+  },
+  "newChatModal": {
+    "title": "Nova conversa",
+    "close": "Fechar",
+    "directMessage": "Mensagem direta",
+    "group": "Grupo",
+    "groupNamePlaceholder": "Nome do grupo",
+    "searchPlaceholder": "Pesquisar por nome de usuário",
+    "noUsersFound": "Nenhum usuário encontrado",
+    "startChat": "Iniciar conversa",
+    "creating": "Criando…",
+    "error": "Não foi possível criar a conversa. Tente novamente."
+  },
+  "theme": {
+    "toggleAria": "Alternar modo escuro",
+    "light": "Claro",
+    "dark": "Escuro"
+  },
+  "language": {
+    "label": "Idioma",
+    "pt": "Português",
+    "en": "English"
+  },
+  "protectedRoute": {
+    "loading": "Carregando..."
+  },
+  "logout": "Sair"
+}

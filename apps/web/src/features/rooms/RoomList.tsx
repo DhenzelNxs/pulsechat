@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useSession } from '../auth/useSession';
 import { useRooms } from './useRooms';
@@ -6,6 +7,7 @@ import { roomDisplayName } from './roomDisplayName';
 import { NewChatModal } from './NewChatModal';
 
 export function RoomList() {
+  const { t } = useTranslation();
   const { data: user } = useSession();
   const rooms = useRooms();
   const navigate = useNavigate();
@@ -14,21 +16,21 @@ export function RoomList() {
   return (
     <nav className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-slate-200 p-4 dark:border-slate-700">
-        <h2 className="font-semibold text-slate-900 dark:text-slate-100">Chats</h2>
+        <h2 className="font-semibold text-slate-900 dark:text-slate-100">{t('chat.chats')}</h2>
         <button
           type="button"
           onClick={() => setShowNewChat(true)}
           className="rounded bg-slate-900 px-2 py-1 text-xs font-medium text-white hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
         >
-          New chat
+          {t('chat.newChat')}
         </button>
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {rooms.isLoading && <p className="p-4 text-sm text-slate-400">Loading chats…</p>}
+        {rooms.isLoading && <p className="p-4 text-sm text-slate-400">{t('chat.loadingChats')}</p>}
 
         {rooms.data?.length === 0 && (
-          <p className="p-4 text-sm text-slate-400">No chats yet. Start one above.</p>
+          <p className="p-4 text-sm text-slate-400">{t('chat.noChatsYet')}</p>
         )}
 
         {rooms.data?.map((room) => (
