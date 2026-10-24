@@ -1,4 +1,6 @@
 import { Message, type MessageDocument } from '../../models/Message';
+import { pusher } from '../../config/pusher';
+import { logger } from '../../config/logger';
 import { getRoomForUser } from '../rooms/rooms.service';
 import type { ListMessagesQuery } from './messages.validation';
 
@@ -42,6 +44,12 @@ export async function sendMessage(
 
   room.lastMessageAt = message.createdAt;
   await room.save();
+
+  try {
+    await pusher.trigger(`private-room-${roomId}`, 'message:new', message.toJSON());
+  } catch (error) {
+    logger.error({ err: error, roomId }, 'Failed to publish message:new to Pusher');
+  }
 
   return message;
 }
