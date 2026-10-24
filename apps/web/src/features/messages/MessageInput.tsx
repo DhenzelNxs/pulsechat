@@ -3,9 +3,11 @@ import { useSendMessage } from './useSendMessage';
 
 interface MessageInputProps {
   roomId: string;
+  onTyping?: () => void;
+  onStopTyping?: () => void;
 }
 
-export function MessageInput({ roomId }: MessageInputProps) {
+export function MessageInput({ roomId, onTyping, onStopTyping }: MessageInputProps) {
   const [content, setContent] = useState('');
   const sendMessage = useSendMessage(roomId);
 
@@ -15,6 +17,7 @@ export function MessageInput({ roomId }: MessageInputProps) {
       return;
     }
 
+    onStopTyping?.();
     sendMessage.mutate(trimmed, {
       onSuccess: () => setContent(''),
     });
@@ -31,7 +34,14 @@ export function MessageInput({ roomId }: MessageInputProps) {
     <div className="flex items-end gap-2 border-t border-slate-200 p-3 dark:border-slate-700">
       <textarea
         value={content}
-        onChange={(event) => setContent(event.target.value)}
+        onChange={(event) => {
+          setContent(event.target.value);
+          if (event.target.value) {
+            onTyping?.();
+          } else {
+            onStopTyping?.();
+          }
+        }}
         onKeyDown={handleKeyDown}
         placeholder="Write a message…"
         rows={1}
