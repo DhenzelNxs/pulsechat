@@ -1,8 +1,10 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { ChatLayout } from './components/ChatLayout';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
-import { HomePage } from './pages/HomePage';
+import { ChatHomePage } from './pages/ChatHomePage';
+import { RoomPage } from './pages/RoomPage';
 
 export function App() {
   return (
@@ -11,7 +13,10 @@ export function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<HomePage />} />
+          <Route element={<ChatLayout />}>
+            <Route path="/" element={<ChatHomePage />} />
+            <Route path="/rooms/:roomId" element={<RoomPage />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>
