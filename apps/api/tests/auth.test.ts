@@ -38,6 +38,17 @@ describe('POST /api/auth/register', () => {
     expect(res.body.error.code).toBe('CONFLICT');
   });
 
+  it('rejects a duplicate username', async () => {
+    await request(app).post('/api/auth/register').send(validUser);
+
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({ ...validUser, email: 'someone-else@example.com' });
+
+    expect(res.status).toBe(409);
+    expect(res.body.error.code).toBe('CONFLICT');
+  });
+
   it('rejects an invalid payload', async () => {
     const res = await request(app)
       .post('/api/auth/register')
@@ -90,6 +101,7 @@ describe('POST /api/auth/login', () => {
 describe('authenticated session flow', () => {
   const agent = request.agent(app);
   let accessToken: string;
+  let userId: string;
 
   beforeEach(async () => {
     await request(app).post('/api/auth/register').send(validUser);
@@ -97,6 +109,7 @@ describe('authenticated session flow', () => {
       .post('/api/auth/login')
       .send({ email: validUser.email, password: validUser.password });
     accessToken = loginRes.body.accessToken;
+    userId = loginRes.body.user._id;
   });
 
   it('GET /api/auth/me returns the current user', async () => {
@@ -108,6 +121,13 @@ describe('authenticated session flow', () => {
 
   it('rejects /me without a token', async () => {
     const res = await request(app).get('/api/auth/me');
+
+    expect(res.status).toBe(401);
+    expect(res.body.error.code).toBe('UNAUTHORIZED');
+  });
+
+  it('rejects /me with a malformed token', async () => {
+    const res = await request(app).get('/api/auth/me').set('Authorization', 'Bearer not-a-real-jwt');
 
     expect(res.status).toBe(401);
     expect(res.body.error.code).toBe('UNAUTHORIZED');
@@ -144,5 +164,63 @@ describe('authenticated session flow', () => {
 
     const refreshRes = await agent.post('/api/auth/refresh');
     expect(refreshRes.status).toBe(401);
+  });
+
+  it('rejects a refresh token still valid as a JWT but revoked server-side', async () => {
+    const loginRes = await request(app)
+      .post('/api/auth/login')
+      .send({ email: validUser.email, password: validUser.password });
+    const refreshCookie = String(loginRes.headers['set-cookie']).match(/refreshToken=[^;]+/)?.[0];
+
+    await request(app)
+      .post('/api/auth/logout')
+      .set('Authorization', `Bearer ${loginRes.body.accessToken}`)
+      .set('Cookie', [refreshCookie as string]);
+
+    const res = await request(app).post('/api/auth/refresh').set('Cookie', [refreshCookie as string]);
+
+    expect(res.status).toBe(401);
+    expect(res.body.error.code).toBe('INVALID_REFRESH_TOKEN');
+  });
+
+  it('rejects a refresh token superseded by a later login', async () => {
+    const now = Date.now();
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(now);
+
+    const firstLogin = await request(app)
+      .post('/api/auth/login')
+      .send({ email: validUser.email, password: validUser.password });
+    const staleCookie = String(firstLogin.headers['set-cookie']).match(/refreshToken=[^;]+/)?.[0];
+
+    vi.setSystemTime(now + 2000);
+
+    await request(app)
+      .post('/api/auth/login')
+      .send({ email: validUser.email, password: validUser.password });
+
+    vi.useRealTimers();
+
+    const res = await request(app).post('/api/auth/refresh').set('Cookie', [staleCookie as string]);
+
+    expect(res.status).toBe(401);
+    expect(res.body.error.code).toBe('INVALID_REFRESH_TOKEN');
+  });
+
+  it('rejects /me for a token whose user no longer exists', async () => {
+    await User.findByIdAndDelete(userId);
+
+    const res = await request(app).get('/api/auth/me').set('Authorization', `Bearer ${accessToken}`);
+
+    expect(res.status).toBe(404);
+  });
+});
+
+describe('GET /api/unknown-route', () => {
+  it('returns a 404 with a NOT_FOUND code', async () => {
+    const res = await request(app).get('/api/this-route-does-not-exist');
+
+    expect(res.status).toBe(404);
+    expect(res.body.error.code).toBe('NOT_FOUND');
   });
 });

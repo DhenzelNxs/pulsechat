@@ -1,5 +1,6 @@
 import request from 'supertest';
 import { createApp } from '../src/app';
+import { User } from '../src/models/User';
 import { authed, registerAndLogin } from './helpers';
 
 const app = createApp();
@@ -43,6 +44,25 @@ describe('POST /api/pusher/auth', () => {
     const channelData = JSON.parse(res.body.channel_data);
     expect(channelData.user_id).toBe(alice.userId);
     expect(channelData.user_info.username).toBe('alice');
+  });
+
+  it('rejects a presence-room subscription from a member whose user record is gone', async () => {
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
+
+    const room = await request(app)
+      .post('/api/rooms')
+      .set(authed(alice.accessToken))
+      .send({ type: 'dm', memberIds: [bob.userId] });
+
+    await User.findByIdAndDelete(alice.userId);
+
+    const res = await request(app)
+      .post('/api/pusher/auth')
+      .set(authed(alice.accessToken))
+      .send({ socket_id: '123.456', channel_name: `presence-room-${room.body.room._id}` });
+
+    expect(res.status).toBe(403);
   });
 
   it('rejects a non-member of the room channel', async () => {

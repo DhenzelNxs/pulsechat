@@ -60,6 +60,17 @@ describe('POST /api/rooms', () => {
     expect(res.status).toBe(400);
   });
 
+  it('rejects a group whose only other member is the creator themselves', async () => {
+    const alice = await registerAndLogin(app, 'alice');
+
+    const res = await request(app)
+      .post('/api/rooms')
+      .set(authed(alice.accessToken))
+      .send({ type: 'group', name: 'Solo', memberIds: [alice.userId] });
+
+    expect(res.status).toBe(400);
+  });
+
   it('rejects a nonexistent member id', async () => {
     const alice = await registerAndLogin(app, 'alice');
 
@@ -195,6 +206,26 @@ describe('messages', () => {
       'message:new',
       expect.objectContaining({ content: 'hey bob' }),
     );
+  });
+
+  it('still persists the message when the Pusher trigger fails', async () => {
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
+
+    const room = await request(app)
+      .post('/api/rooms')
+      .set(authed(alice.accessToken))
+      .send({ type: 'dm', memberIds: [bob.userId] });
+
+    vi.mocked(pusher.trigger).mockRejectedValueOnce(new Error('pusher is down'));
+
+    const res = await request(app)
+      .post(`/api/rooms/${room.body.room._id}/messages`)
+      .set(authed(alice.accessToken))
+      .send({ content: 'still works' });
+
+    expect(res.status).toBe(201);
+    expect(res.body.message.content).toBe('still works');
   });
 
   it('rejects sending a message as a non-member', async () => {
