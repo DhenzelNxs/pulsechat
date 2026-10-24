@@ -1,6 +1,14 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import List from '@mui/material/List';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
+import AddIcon from '@mui/icons-material/Add';
 import { useSession } from '../auth/useSession';
 import { useRooms } from './useRooms';
 import { roomDisplayName } from './roomDisplayName';
@@ -10,52 +18,52 @@ export function RoomList() {
   const { t } = useTranslation();
   const { data: user } = useSession();
   const rooms = useRooms();
+  const location = useLocation();
   const navigate = useNavigate();
   const [showNewChat, setShowNewChat] = useState(false);
 
   return (
-    <nav className="flex h-full flex-col">
-      <div className="flex items-center justify-between border-b border-slate-200 p-4 dark:border-slate-700">
-        <h2 className="font-semibold text-slate-900 dark:text-slate-100">{t('chat.chats')}</h2>
-        <button
-          type="button"
-          onClick={() => setShowNewChat(true)}
-          className="rounded bg-slate-900 px-2 py-1 text-xs font-medium text-white hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
-        >
+    <Box component="nav" sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Stack
+        direction="row"
+        sx={{ p: 2, borderBottom: 1, borderColor: 'divider', alignItems: 'center', justifyContent: 'space-between' }}
+      >
+        <Typography variant="h6" component="h2" sx={{ fontWeight: 600 }}>
+          {t('chat.chats')}
+        </Typography>
+        <Button size="small" variant="contained" startIcon={<AddIcon />} onClick={() => setShowNewChat(true)}>
           {t('chat.newChat')}
-        </button>
-      </div>
+        </Button>
+      </Stack>
 
-      <div className="flex-1 overflow-y-auto">
-        {rooms.isLoading && <p className="p-4 text-sm text-slate-400">{t('chat.loadingChats')}</p>}
-
-        {rooms.data?.length === 0 && (
-          <p className="p-4 text-sm text-slate-400">{t('chat.noChatsYet')}</p>
+      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+        {rooms.isLoading && (
+          <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+            {t('chat.loadingChats')}
+          </Typography>
         )}
 
-        {rooms.data?.map((room) => (
-          <NavLink
-            key={room._id}
-            to={`/rooms/${room._id}`}
-            className={({ isActive }) =>
-              `block border-b border-slate-100 px-4 py-3 text-sm dark:border-slate-800 ${
-                isActive
-                  ? 'bg-slate-100 font-medium text-slate-900 dark:bg-slate-800 dark:text-slate-100'
-                  : 'text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800/50'
-              }`
-            }
-          >
-            {roomDisplayName(room, user?._id)}
-          </NavLink>
-        ))}
-      </div>
+        {rooms.data?.length === 0 && (
+          <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+            {t('chat.noChatsYet')}
+          </Typography>
+        )}
+
+        <List disablePadding>
+          {rooms.data?.map((room) => {
+            const isActive = location.pathname === `/rooms/${room._id}`;
+            return (
+              <ListItemButton key={room._id} component={Link} to={`/rooms/${room._id}`} selected={isActive} divider>
+                <ListItemText slotProps={{ primary: { noWrap: true } }} primary={roomDisplayName(room, user?._id)} />
+              </ListItemButton>
+            );
+          })}
+        </List>
+      </Box>
 
       {showNewChat && (
-        <NewChatModal
-          onClose={() => setShowNewChat(false)}
-          onCreated={(room) => navigate(`/rooms/${room._id}`)}
-        />
+        <NewChatModal onClose={() => setShowNewChat(false)} onCreated={(room) => navigate(`/rooms/${room._id}`)} />
       )}
-    </nav>
+    </Box>
   );
 }

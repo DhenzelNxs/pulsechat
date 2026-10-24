@@ -1,5 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import { useSession } from '../auth/useSession';
 import { useMessages } from './useMessages';
 import { useMarkRoomRead } from './useMarkRoomRead';
@@ -58,11 +60,19 @@ export function MessageList({ roomId, otherMemberId }: MessageListProps) {
   };
 
   if (messages.isLoading) {
-    return <p className="p-4 text-sm text-slate-400">{t('chat.loadingMessages')}</p>;
+    return (
+      <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+        {t('chat.loadingMessages')}
+      </Typography>
+    );
   }
 
   if (ordered.length === 0) {
-    return <p className="p-4 text-sm text-slate-400">{t('chat.noMessagesYet')}</p>;
+    return (
+      <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+        {t('chat.noMessagesYet')}
+      </Typography>
+    );
   }
 
   const lastMessage = ordered[ordered.length - 1];
@@ -72,42 +82,47 @@ export function MessageList({ roomId, otherMemberId }: MessageListProps) {
   );
 
   return (
-    <div
+    <Box
       ref={containerRef}
       onScroll={handleScroll}
-      className="flex-1 space-y-2 overflow-y-auto p-4"
+      sx={{ flex: 1, overflowY: 'auto', p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}
     >
       {messages.isFetchingNextPage && (
-        <p className="pb-2 text-center text-xs text-slate-400">
+        <Typography variant="caption" color="text.secondary" sx={{ pb: 1, textAlign: 'center' }}>
           {t('chat.loadingOlderMessages')}
-        </p>
+        </Typography>
       )}
       {ordered.map((message) => {
         const isOwn = message.senderId === user?._id;
         return (
-          <div
+          <Box
             key={message._id}
             id={`message-${message._id}`}
-            className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+            sx={{ display: 'flex', justifyContent: isOwn ? 'flex-end' : 'flex-start' }}
           >
-            <div
-              className={`max-w-xs rounded-lg px-3 py-2 text-sm break-words sm:max-w-sm ${
-                isOwn
-                  ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                  : 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100'
-              }`}
+            <Box
+              sx={{
+                maxWidth: { xs: 280, sm: 360 },
+                borderRadius: 2,
+                px: 1.5,
+                py: 1,
+                fontSize: '0.875rem',
+                wordBreak: 'break-word',
+                bgcolor: isOwn ? 'primary.main' : 'action.hover',
+                color: isOwn ? 'primary.contrastText' : 'text.primary',
+              }}
             >
               <MessageContent content={message.content} />
-            </div>
-          </div>
+            </Box>
+          </Box>
         );
       })}
       {showSeenIndicator && (
-        <p className="pr-1 text-right text-xs text-slate-400">
+        <Typography variant="caption" color="text.secondary" sx={{ pr: 0.5, textAlign: 'right' }}>
           {lastMessageSeen ? t('chat.seen') : t('chat.sent')}
-        </p>
+        </Typography>
       )}
       <div ref={bottomRef} />
-    </div>
+    </Box>
   );
 }

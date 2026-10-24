@@ -1,5 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Avatar from '@mui/material/Avatar';
+import Typography from '@mui/material/Typography';
+import Divider from '@mui/material/Divider';
+import Button from '@mui/material/Button';
 import { RoomList } from '../features/rooms/RoomList';
 import { ThemeToggle } from './ThemeToggle';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -20,43 +26,50 @@ export function ChatLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100">
-      <aside
-        className={`w-full border-r border-slate-200 dark:border-slate-700 md:w-80 md:shrink-0 ${
-          hasActiveRoom ? 'hidden md:flex md:flex-col' : 'flex flex-col'
-        }`}
+    <Box sx={{ display: 'flex', height: '100vh', bgcolor: 'background.default' }}>
+      <Box
+        component="aside"
+        sx={{
+          width: { xs: '100%', md: 320 },
+          flexShrink: { md: 0 },
+          display: { xs: hasActiveRoom ? 'none' : 'flex', md: 'flex' },
+          flexDirection: 'column',
+          borderRight: 1,
+          borderColor: 'divider',
+        }}
       >
         <RoomList />
-        <div className="border-t border-slate-200 dark:border-slate-700">
-          {currentUser && (
-            <div className="flex items-center gap-2 px-3 pt-3">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white dark:bg-slate-100 dark:text-slate-900">
-                {initials(currentUser)}
-              </span>
-              <span className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
-                {displayName(currentUser)}
-              </span>
-            </div>
-          )}
-          <div className="flex items-center justify-between gap-2 p-3">
-            <div className="flex items-center gap-2">
-              <ThemeToggle />
-              <LanguageSwitcher />
-            </div>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100"
-            >
-              {t('logout')}
-            </button>
-          </div>
-        </div>
-      </aside>
+        <Divider />
+        {currentUser && (
+          <Stack direction="row" spacing={1.5} sx={{ px: 2, pt: 2, alignItems: 'center' }}>
+            <Avatar sx={{ width: 32, height: 32, fontSize: '0.75rem' }}>{initials(currentUser)}</Avatar>
+            <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
+              {displayName(currentUser)}
+            </Typography>
+          </Stack>
+        )}
+        <Stack direction="row" sx={{ p: 2, alignItems: 'center', justifyContent: 'space-between' }}>
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+            <ThemeToggle />
+            <LanguageSwitcher />
+          </Stack>
+          <Button size="small" color="inherit" onClick={handleLogout}>
+            {t('logout')}
+          </Button>
+        </Stack>
+      </Box>
 
-      <main className={`flex-1 ${hasActiveRoom ? 'flex flex-col' : 'hidden md:flex md:flex-col'}`}>
+      <Box
+        component="main"
+        sx={{
+          flex: 1,
+          display: { xs: hasActiveRoom ? 'flex' : 'none', md: 'flex' },
+          flexDirection: 'column',
+          minWidth: 0,
+        }}
+      >
         <Outlet />
-      </main>
-    </div>
+      </Box>
+    </Box>
   );
 }

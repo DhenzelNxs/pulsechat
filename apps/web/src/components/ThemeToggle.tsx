@@ -1,18 +1,19 @@
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '../hooks/useTheme';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import { useThemeMode } from '../theme/themeModeContext';
 
 export function ThemeToggle() {
   const { t } = useTranslation();
-  const { theme, toggleTheme } = useTheme();
+  const { mode, toggleMode } = useThemeMode();
 
   return (
-    <button
-      type="button"
-      onClick={toggleTheme}
-      aria-label={t('theme.toggleAria')}
-      className="rounded border border-slate-300 px-2 py-1 text-sm text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
-    >
-      {theme === 'dark' ? `☀️ ${t('theme.light')}` : `🌙 ${t('theme.dark')}`}
-    </button>
+    <Tooltip title={t('theme.toggleAria')}>
+      <IconButton onClick={toggleMode} aria-label={t('theme.toggleAria')} size="small">
+        {mode === 'dark' ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+      </IconButton>
+    </Tooltip>
   );
 }

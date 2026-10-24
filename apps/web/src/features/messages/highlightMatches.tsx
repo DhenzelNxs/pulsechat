@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import Box from '@mui/material/Box';
 
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -14,12 +15,13 @@ export function highlightMatches(text: string, query: string): ReactNode {
 
   return parts.map((part, index) =>
     index % 2 === 1 ? (
-      <mark
+      <Box
         key={index}
-        className="rounded bg-yellow-200 px-0.5 text-slate-900 dark:bg-yellow-500/70 dark:text-slate-950"
+        component="mark"
+        sx={{ borderRadius: 0.5, px: 0.25, bgcolor: 'warning.light', color: 'warning.contrastText' }}
       >
         {part}
-      </mark>
+      </Box>
     ) : (
       part
     ),

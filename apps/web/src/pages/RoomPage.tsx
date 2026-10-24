@@ -2,6 +2,13 @@ import { useState } from 'react';
 import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import SearchIcon from '@mui/icons-material/Search';
 import { useSession } from '../features/auth/useSession';
 import { useRoom } from '../features/rooms/useRoom';
 import { roomDisplayName } from '../features/rooms/roomDisplayName';
@@ -29,11 +36,19 @@ export function RoomPage() {
   const [showSearch, setShowSearch] = useState(false);
 
   if (room.isLoading) {
-    return <p className="p-4 text-sm text-slate-400">{t('chat.loadingChat')}</p>;
+    return (
+      <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+        {t('chat.loadingChat')}
+      </Typography>
+    );
   }
 
   if (!room.data || !roomId) {
-    return <p className="p-4 text-sm text-slate-400">{t('chat.chatNotFound')}</p>;
+    return (
+      <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+        {t('chat.chatNotFound')}
+      </Typography>
+    );
   }
 
   const otherMember =
@@ -41,42 +56,56 @@ export function RoomPage() {
   const isOtherMemberOnline = otherMember ? onlineUserIds.has(otherMember._id) : false;
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center gap-3 border-b border-slate-200 p-4 dark:border-slate-700">
-        <Link
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Stack direction="row" spacing={1.5} sx={{ p: 2, borderBottom: 1, borderColor: 'divider', alignItems: 'center' }}>
+        <IconButton
+          component={Link}
           to="/"
-          className="text-slate-500 hover:text-slate-800 md:hidden dark:text-slate-400 dark:hover:text-slate-100"
+          size="small"
+          aria-label={t('chat.backToChats')}
+          sx={{ display: { xs: 'inline-flex', md: 'none' } }}
         >
-          ←
-        </Link>
-        <h1 className="flex flex-1 items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
-          {roomDisplayName(room.data, user?._id)}
+          <ArrowBackIcon fontSize="small" />
+        </IconButton>
+        <Stack direction="row" spacing={1} sx={{ flex: 1, minWidth: 0, alignItems: 'center' }}>
+          <Typography variant="subtitle1" noWrap sx={{ fontWeight: 600 }}>
+            {roomDisplayName(room.data, user?._id)}
+          </Typography>
           {otherMember && (
-            <span
-              className={`h-2 w-2 rounded-full ${isOtherMemberOnline ? 'bg-green-500' : 'bg-slate-400 dark:bg-slate-600'}`}
+            <Box
+              component="span"
               title={isOtherMemberOnline ? t('chat.online') : t('chat.offline')}
+              sx={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                bgcolor: isOtherMemberOnline ? 'success.main' : 'action.disabled',
+                flexShrink: 0,
+              }}
             />
           )}
-        </h1>
-        <button
-          type="button"
-          onClick={() => setShowSearch((current) => !current)}
-          className="text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100"
-        >
-          {showSearch ? t('chat.hideSearch') : t('chat.search')}
-        </button>
-      </div>
+        </Stack>
+        <Tooltip title={showSearch ? t('chat.hideSearch') : t('chat.search')}>
+          <IconButton
+            size="small"
+            aria-label={showSearch ? t('chat.hideSearch') : t('chat.search')}
+            onClick={() => setShowSearch((current) => !current)}
+          >
+            <SearchIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Stack>
       {showSearch && <MessageSearch roomId={roomId} onClose={() => setShowSearch(false)} />}
       <MessageList roomId={roomId} otherMemberId={otherMember?._id} />
       {typingUsers.length > 0 && (
-        <p className="px-4 pb-1 text-xs text-slate-400 italic">
+        <Typography variant="caption" color="text.secondary" sx={{ px: 2, pb: 0.5, fontStyle: 'italic' }}>
           {typingLabel(
             t,
             typingUsers.map((typingUser) => typingUser.username),
           )}
-        </p>
+        </Typography>
       )}
       <MessageInput roomId={roomId} onTyping={notifyTyping} onStopTyping={stopTyping} />
-    </div>
+    </Box>
   );
 }
