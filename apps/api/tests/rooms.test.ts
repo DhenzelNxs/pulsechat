@@ -273,4 +273,124 @@ describe('messages', () => {
     const secondPageIds = secondPage.body.messages.map((m: { _id: string }) => m._id);
     expect(firstPageIds).not.toEqual(expect.arrayContaining(secondPageIds));
   });
+
+  it('resolves @mentions of room members and ignores non-members', async () => {
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
+    await registerAndLogin(app, 'carol');
+
+    const room = await request(app)
+      .post('/api/rooms')
+      .set(authed(alice.accessToken))
+      .send({ type: 'dm', memberIds: [bob.userId] });
+
+    const res = await request(app)
+      .post(`/api/rooms/${room.body.room._id}/messages`)
+      .set(authed(alice.accessToken))
+      .send({ content: 'hey @bob, did you see @carol and @nobody?' });
+
+    expect(res.status).toBe(201);
+    expect(res.body.message.mentions).toEqual([bob.userId]);
+  });
+
+  it('matches mentions case-insensitively', async () => {
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'Bob');
+
+    const room = await request(app)
+      .post('/api/rooms')
+      .set(authed(alice.accessToken))
+      .send({ type: 'dm', memberIds: [bob.userId] });
+
+    const res = await request(app)
+      .post(`/api/rooms/${room.body.room._id}/messages`)
+      .set(authed(alice.accessToken))
+      .send({ content: 'hey @bob' });
+
+    expect(res.body.message.mentions).toEqual([bob.userId]);
+  });
+});
+
+describe('GET /api/rooms/:id/messages/search', () => {
+  it('finds messages matching the query, case-insensitively', async () => {
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
+
+    const room = await request(app)
+      .post('/api/rooms')
+      .set(authed(alice.accessToken))
+      .send({ type: 'dm', memberIds: [bob.userId] });
+
+    await request(app)
+      .post(`/api/rooms/${room.body.room._id}/messages`)
+      .set(authed(alice.accessToken))
+      .send({ content: 'the deploy is DONE' });
+    await request(app)
+      .post(`/api/rooms/${room.body.room._id}/messages`)
+      .set(authed(alice.accessToken))
+      .send({ content: 'unrelated message' });
+
+    const res = await request(app)
+      .get(`/api/rooms/${room.body.room._id}/messages/search?q=done`)
+      .set(authed(alice.accessToken));
+
+    expect(res.status).toBe(200);
+    expect(res.body.messages).toHaveLength(1);
+    expect(res.body.messages[0].content).toBe('the deploy is DONE');
+  });
+
+  it('treats the query as a literal string, not a regex', async () => {
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
+
+    const room = await request(app)
+      .post('/api/rooms')
+      .set(authed(alice.accessToken))
+      .send({ type: 'dm', memberIds: [bob.userId] });
+
+    await request(app)
+      .post(`/api/rooms/${room.body.room._id}/messages`)
+      .set(authed(alice.accessToken))
+      .send({ content: 'price is $5 (on sale)' });
+
+    const res = await request(app)
+      .get(`/api/rooms/${room.body.room._id}/messages/search?q=${encodeURIComponent('$5 (on sale)')}`)
+      .set(authed(alice.accessToken));
+
+    expect(res.status).toBe(200);
+    expect(res.body.messages).toHaveLength(1);
+  });
+
+  it('rejects a non-member', async () => {
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
+    const carol = await registerAndLogin(app, 'carol');
+
+    const room = await request(app)
+      .post('/api/rooms')
+      .set(authed(alice.accessToken))
+      .send({ type: 'dm', memberIds: [bob.userId] });
+
+    const res = await request(app)
+      .get(`/api/rooms/${room.body.room._id}/messages/search?q=hey`)
+      .set(authed(carol.accessToken));
+
+    expect(res.status).toBe(403);
+  });
+
+  it('rejects an empty query', async () => {
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
+
+    const room = await request(app)
+      .post('/api/rooms')
+      .set(authed(alice.accessToken))
+      .send({ type: 'dm', memberIds: [bob.userId] });
+
+    const res = await request(app)
+      .get(`/api/rooms/${room.body.room._id}/messages/search?q=`)
+      .set(authed(alice.accessToken));
+
+    expect(res.status).toBe(400);
+  });
 });

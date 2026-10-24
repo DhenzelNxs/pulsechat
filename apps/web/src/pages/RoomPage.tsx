@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useSession } from '../features/auth/useSession';
 import { useRoom } from '../features/rooms/useRoom';
 import { roomDisplayName } from '../features/rooms/roomDisplayName';
 import { MessageList } from '../features/messages/MessageList';
 import { MessageInput } from '../features/messages/MessageInput';
+import { MessageSearch } from '../features/messages/MessageSearch';
 import { useRoomChannel } from '../features/realtime/useRoomChannel';
 
 function typingLabel(usernames: string[]): string {
@@ -21,6 +23,7 @@ export function RoomPage() {
   const { data: user } = useSession();
   const room = useRoom(roomId);
   const { onlineUserIds, typingUsers, notifyTyping, stopTyping } = useRoomChannel(roomId);
+  const [showSearch, setShowSearch] = useState(false);
 
   if (room.isLoading) {
     return <p className="p-4 text-sm text-slate-400">Loading chat…</p>;
@@ -43,7 +46,7 @@ export function RoomPage() {
         >
           ←
         </Link>
-        <h1 className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
+        <h1 className="flex flex-1 items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
           {roomDisplayName(room.data, user?._id)}
           {otherMember && (
             <span
@@ -52,7 +55,15 @@ export function RoomPage() {
             />
           )}
         </h1>
+        <button
+          type="button"
+          onClick={() => setShowSearch((current) => !current)}
+          className="text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100"
+        >
+          {showSearch ? 'Hide search' : 'Search'}
+        </button>
       </div>
+      {showSearch && <MessageSearch roomId={roomId} onClose={() => setShowSearch(false)} />}
       <MessageList roomId={roomId} />
       {typingUsers.length > 0 && (
         <p className="px-4 pb-1 text-xs text-slate-400 italic">

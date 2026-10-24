@@ -12,3 +12,9 @@ export const listMessagesQuerySchema = z.object({
 });
 
 export type ListMessagesQuery = z.infer<typeof listMessagesQuerySchema>;
+
+export const searchMessagesQuerySchema = z.object({
+  q: z.string().trim().min(1, 'Search query is required').max(200),
+});
+
+export type SearchMessagesQuery = z.infer<typeof searchMessagesQuerySchema>;
