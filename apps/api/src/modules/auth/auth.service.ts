@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import bcrypt from 'bcrypt';
 import { User, type UserDocument } from '../../models/User';
 import { AppError } from '../../errors/AppError';
@@ -5,6 +6,10 @@ import { signAccessToken, signRefreshToken, verifyRefreshToken } from './auth.to
 import type { LoginInput, RegisterInput } from '@pulsechat/shared';
 
 const BCRYPT_COST_FACTOR = 12;
+
+function hashableTokenDigest(token: string): string {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
 
 export interface AuthTokens {
   accessToken: string;
@@ -46,7 +51,7 @@ export async function loginUser(input: LoginInput): Promise<{ user: UserDocument
   const accessToken = signAccessToken(user.id);
   const refreshToken = signRefreshToken(user.id);
 
-  user.refreshTokenHash = await bcrypt.hash(refreshToken, BCRYPT_COST_FACTOR);
+  user.refreshTokenHash = await bcrypt.hash(hashableTokenDigest(refreshToken), BCRYPT_COST_FACTOR);
   user.status = 'online';
   user.lastSeenAt = new Date();
   await user.save();
@@ -69,7 +74,7 @@ export async function refreshAccessToken(refreshToken: string): Promise<AuthToke
     throw new AppError(401, 'INVALID_REFRESH_TOKEN', 'Invalid or expired refresh token');
   }
 
-  const matches = await bcrypt.compare(refreshToken, user.refreshTokenHash);
+  const matches = await bcrypt.compare(hashableTokenDigest(refreshToken), user.refreshTokenHash);
 
   if (!matches) {
     throw new AppError(401, 'INVALID_REFRESH_TOKEN', 'Invalid or expired refresh token');
