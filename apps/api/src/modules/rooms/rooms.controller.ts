@@ -18,3 +18,8 @@ export async function getById(req: AuthenticatedRequest, res: Response) {
   await room.populate('memberIds', 'username avatarUrl status');
   res.status(200).json({ room });
 }
+
+export async function markRead(req: AuthenticatedRequest, res: Response) {
+  await roomsService.markRoomRead(req.userId as string, req.params.id as string);
+  res.status(204).send();
+}

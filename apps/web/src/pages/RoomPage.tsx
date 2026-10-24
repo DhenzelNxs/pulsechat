@@ -64,7 +64,7 @@ export function RoomPage() {
         </button>
       </div>
       {showSearch && <MessageSearch roomId={roomId} onClose={() => setShowSearch(false)} />}
-      <MessageList roomId={roomId} />
+      <MessageList roomId={roomId} otherMemberId={otherMember?._id} />
       {typingUsers.length > 0 && (
         <p className="px-4 pb-1 text-xs text-slate-400 italic">
           {typingLabel(typingUsers.map((typingUser) => typingUser.username))}

@@ -311,6 +311,60 @@ describe('messages', () => {
   });
 });
 
+describe('POST /api/rooms/:id/read', () => {
+  it('marks messages from other members as read, but not the readers own messages', async () => {
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
+
+    const room = await request(app)
+      .post('/api/rooms')
+      .set(authed(alice.accessToken))
+      .send({ type: 'dm', memberIds: [bob.userId] });
+
+    await request(app)
+      .post(`/api/rooms/${room.body.room._id}/messages`)
+      .set(authed(alice.accessToken))
+      .send({ content: 'hey bob' });
+    await request(app)
+      .post(`/api/rooms/${room.body.room._id}/messages`)
+      .set(authed(bob.accessToken))
+      .send({ content: 'hey alice' });
+
+    const readRes = await request(app)
+      .post(`/api/rooms/${room.body.room._id}/read`)
+      .set(authed(bob.accessToken));
+
+    expect(readRes.status).toBe(204);
+
+    const messagesRes = await request(app)
+      .get(`/api/rooms/${room.body.room._id}/messages`)
+      .set(authed(alice.accessToken));
+
+    const aliceMessage = messagesRes.body.messages.find((m: { content: string }) => m.content === 'hey bob');
+    const bobMessage = messagesRes.body.messages.find((m: { content: string }) => m.content === 'hey alice');
+
+    expect(aliceMessage.readBy).toContain(bob.userId);
+    expect(bobMessage.readBy).not.toContain(bob.userId);
+  });
+
+  it('rejects a non-member', async () => {
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
+    const carol = await registerAndLogin(app, 'carol');
+
+    const room = await request(app)
+      .post('/api/rooms')
+      .set(authed(alice.accessToken))
+      .send({ type: 'dm', memberIds: [bob.userId] });
+
+    const res = await request(app)
+      .post(`/api/rooms/${room.body.room._id}/read`)
+      .set(authed(carol.accessToken));
+
+    expect(res.status).toBe(403);
+  });
+});
+
 describe('GET /api/rooms/:id/messages/search', () => {
   it('finds messages matching the query, case-insensitively', async () => {
     const alice = await registerAndLogin(app, 'alice');

@@ -3,7 +3,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { Channel, PresenceChannel } from 'pusher-js';
 import { subscribe, unsubscribe } from '../../lib/pusher';
 import { useSession } from '../auth/useSession';
-import type { Message, MessagePage } from '../../api/messages';
+import type { Message } from '../../api/messages';
+import { prependMessage } from '../messages/messageCache';
 
 const TYPING_IDLE_MS = 3000;
 
@@ -50,15 +51,7 @@ export function useRoomChannel(roomId: string | undefined) {
     };
 
     const handleNewMessage = (message: Message) => {
-      queryClient.setQueryData<MessagePage>(['rooms', roomId, 'messages'], (current) => {
-        if (!current) {
-          return current;
-        }
-        if (current.messages.some((existing) => existing._id === message._id)) {
-          return current;
-        }
-        return { ...current, messages: [message, ...current.messages] };
-      });
+      prependMessage(queryClient, roomId, message);
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
     };
 
