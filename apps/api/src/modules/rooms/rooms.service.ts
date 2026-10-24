@@ -1,5 +1,6 @@
 import { Room, type RoomDocument } from '../../models/Room';
 import { User } from '../../models/User';
+import { Message } from '../../models/Message';
 import { AppError } from '../../errors/AppError';
 import type { CreateRoomInput } from './rooms.validation';
 
@@ -46,4 +47,13 @@ export async function getRoomForUser(userId: string, roomId: string): Promise<Ro
   }
 
   return room;
+}
+
+export async function markRoomRead(userId: string, roomId: string): Promise<void> {
+  await getRoomForUser(userId, roomId);
+
+  await Message.updateMany(
+    { roomId, senderId: { $ne: userId } },
+    { $addToSet: { readBy: userId } },
+  );
 }

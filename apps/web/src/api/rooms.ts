@@ -42,3 +42,7 @@ export function createRoom(input: CreateRoomInput): Promise<{ room: Room }> {
 export function searchUsers(q: string): Promise<{ users: User[] }> {
   return apiFetch(`/api/users/search?q=${encodeURIComponent(q)}`);
 }
+
+export function markRoomRead(roomId: string): Promise<void> {
+  return apiFetch(`/api/rooms/${roomId}/read`, { method: 'POST' });
+}

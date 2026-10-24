@@ -17,6 +17,7 @@ roomsRouter.use(requireAuth);
 roomsRouter.post('/', validateBody(createRoomSchema), roomsController.create);
 roomsRouter.get('/', roomsController.list);
 roomsRouter.get('/:id', roomsController.getById);
+roomsRouter.post('/:id/read', roomsController.markRead);
 roomsRouter.get('/:id/messages', validateQuery(listMessagesQuerySchema), messagesController.list);
 roomsRouter.get(
   '/:id/messages/search',

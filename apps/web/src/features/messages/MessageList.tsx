@@ -1,21 +1,59 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useSession } from '../auth/useSession';
 import { useMessages } from './useMessages';
+import { useMarkRoomRead } from './useMarkRoomRead';
 import { MessageContent } from './MessageContent';
 
 interface MessageListProps {
   roomId: string;
+  otherMemberId?: string;
 }
 
-export function MessageList({ roomId }: MessageListProps) {
+const LOAD_MORE_THRESHOLD_PX = 100;
+
+export function MessageList({ roomId, otherMemberId }: MessageListProps) {
   const { data: user } = useSession();
   const messages = useMessages(roomId);
+  const { mutate: markRead } = useMarkRoomRead(roomId);
+  const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const ordered = messages.data ? [...messages.data.messages].reverse() : [];
+  const prevScrollHeightRef = useRef(0);
+
+  const pages = messages.data?.pages ?? [];
+  const ordered = pages.flatMap((page) => page.messages).reverse();
+  const newestPageCount = pages[0]?.messages.length ?? 0;
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ block: 'end' });
-  }, [ordered.length]);
+    if (roomId && newestPageCount > 0) {
+      markRead();
+    }
+  }, [roomId, newestPageCount, markRead]);
+
+  useEffect(() => {
+    if (prevScrollHeightRef.current === 0) {
+      bottomRef.current?.scrollIntoView({ block: 'end' });
+    }
+  }, [newestPageCount]);
+
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!container || prevScrollHeightRef.current === 0) {
+      return;
+    }
+    container.scrollTop = container.scrollHeight - prevScrollHeightRef.current;
+    prevScrollHeightRef.current = 0;
+  }, [pages.length]);
+
+  const handleScroll = () => {
+    const container = containerRef.current;
+    if (!container || !messages.hasNextPage || messages.isFetchingNextPage) {
+      return;
+    }
+    if (container.scrollTop < LOAD_MORE_THRESHOLD_PX) {
+      prevScrollHeightRef.current = container.scrollHeight;
+      messages.fetchNextPage();
+    }
+  };
 
   if (messages.isLoading) {
     return <p className="p-4 text-sm text-slate-400">Loading messages…</p>;
@@ -25,8 +63,21 @@ export function MessageList({ roomId }: MessageListProps) {
     return <p className="p-4 text-sm text-slate-400">No messages yet. Say hi!</p>;
   }
 
+  const lastMessage = ordered[ordered.length - 1];
+  const showSeenIndicator = Boolean(lastMessage && lastMessage.senderId === user?._id);
+  const lastMessageSeen = Boolean(
+    showSeenIndicator && otherMemberId && lastMessage?.readBy.includes(otherMemberId),
+  );
+
   return (
-    <div className="flex-1 space-y-2 overflow-y-auto p-4">
+    <div
+      ref={containerRef}
+      onScroll={handleScroll}
+      className="flex-1 space-y-2 overflow-y-auto p-4"
+    >
+      {messages.isFetchingNextPage && (
+        <p className="pb-2 text-center text-xs text-slate-400">Loading older messages…</p>
+      )}
       {ordered.map((message) => {
         const isOwn = message.senderId === user?._id;
         return (
@@ -47,6 +98,9 @@ export function MessageList({ roomId }: MessageListProps) {
           </div>
         );
       })}
+      {showSeenIndicator && (
+        <p className="pr-1 text-right text-xs text-slate-400">{lastMessageSeen ? 'Seen' : 'Sent'}</p>
+      )}
       <div ref={bottomRef} />
     </div>
   );
