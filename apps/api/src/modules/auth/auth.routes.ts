@@ -3,7 +3,7 @@ import { requireAuth } from '../../middleware/requireAuth';
 import { validateBody } from '../../middleware/validate';
 import { authRateLimiter } from '../../middleware/rateLimiter';
 import * as authController from './auth.controller';
-import { loginSchema, registerSchema } from './auth.validation';
+import { loginSchema, registerSchema } from '@pulsechat/shared';
 
 export const authRouter = Router();
 
