@@ -6,6 +6,9 @@ build/
 .env.local
 *.local
 coverage/
+test-results/
+playwright-report/
+blob-report/
 .DS_Store
 npm-debug.log*
 pnpm-debug.log*
