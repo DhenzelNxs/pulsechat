@@ -1,5 +1,5 @@
 {
-  "installCommand": "npm install -g pnpm@12.6.0 && pnpm install --frozen-lockfile",
+  "installCommand": "npm install -g --allow-scripts=pnpm pnpm@12.6.0 && pnpm install --frozen-lockfile",
   "buildCommand": "pnpm run build",
   "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
 }
