@@ -3,6 +3,8 @@ import type { User } from './auth';
 
 export interface RoomMember {
   _id: string;
+  firstName?: string;
+  lastName?: string;
   username: string;
   avatarUrl?: string;
   status: 'online' | 'offline' | 'away';

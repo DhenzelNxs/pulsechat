@@ -32,7 +32,7 @@ export async function createRoom(creatorId: string, input: CreateRoomInput): Pro
 export async function listRoomsForUser(userId: string): Promise<RoomDocument[]> {
   return Room.find({ memberIds: userId })
     .sort({ lastMessageAt: -1 })
-    .populate('memberIds', 'username avatarUrl status');
+    .populate('memberIds', 'firstName lastName username avatarUrl status');
 }
 
 export async function getRoomForUser(userId: string, roomId: string): Promise<RoomDocument> {

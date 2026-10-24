@@ -4,11 +4,18 @@ function uniqueUsername(prefix: string): string {
   return `${prefix}${Date.now()}${Math.floor(Math.random() * 1000)}`;
 }
 
-async function registerAndLogin(page: Page, username: string): Promise<void> {
+async function registerAndLogin(
+  page: Page,
+  username: string,
+  firstName: string,
+  lastName: string,
+): Promise<void> {
   const email = `${username}@example.com`;
   const password = 'Password123!';
 
   await page.goto('/register');
+  await page.getByLabel('First name').fill(firstName);
+  await page.getByLabel('Last name').fill(lastName);
   await page.getByLabel('Username').fill(username);
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
@@ -31,8 +38,8 @@ test('register two users, DM, and see a sent message appear for the recipient', 
   const alice = uniqueUsername('alice');
   const bob = uniqueUsername('bob');
 
-  await registerAndLogin(pageA, alice);
-  await registerAndLogin(pageB, bob);
+  await registerAndLogin(pageA, alice, 'Alice', 'Anderson');
+  await registerAndLogin(pageB, bob, 'Bob', 'Baker');
 
   await pageA.getByRole('button', { name: 'New chat' }).click();
   await pageA.getByPlaceholder('Search by username').fill(bob);
@@ -46,7 +53,7 @@ test('register two users, DM, and see a sent message appear for the recipient', 
   await expect(pageA.getByText(messageText)).toBeVisible();
 
   await pageB.goto('/');
-  await pageB.getByRole('link', { name: alice }).click();
+  await pageB.getByRole('link', { name: 'Alice Anderson' }).click();
   await pageB.waitForURL('**/rooms/**');
   await expect(pageB.getByText(messageText)).toBeVisible();
 

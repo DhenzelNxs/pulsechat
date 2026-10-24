@@ -1,6 +1,18 @@
 import { Schema, model, type InferSchemaType, type HydratedDocument } from 'mongoose';
 
 const userSchema = new Schema({
+  firstName: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 50,
+  },
+  lastName: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 50,
+  },
   username: {
     type: String,
     required: true,

@@ -28,6 +28,40 @@ export function RegisterPage() {
       >
         <h1 className="text-2xl font-semibold text-slate-900">Create your account</h1>
 
+        <div className="flex gap-3">
+          <div className="flex-1 space-y-1">
+            <label htmlFor="firstName" className="block text-sm font-medium text-slate-700">
+              First name
+            </label>
+            <input
+              id="firstName"
+              type="text"
+              autoComplete="given-name"
+              placeholder="Dhenzel"
+              className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
+              {...register('firstName')}
+            />
+            {errors.firstName && (
+              <p className="text-sm text-red-600">{errors.firstName.message}</p>
+            )}
+          </div>
+
+          <div className="flex-1 space-y-1">
+            <label htmlFor="lastName" className="block text-sm font-medium text-slate-700">
+              Last name
+            </label>
+            <input
+              id="lastName"
+              type="text"
+              autoComplete="family-name"
+              placeholder="Ribeiro"
+              className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
+              {...register('lastName')}
+            />
+            {errors.lastName && <p className="text-sm text-red-600">{errors.lastName.message}</p>}
+          </div>
+        </div>
+
         <div className="space-y-1">
           <label htmlFor="username" className="block text-sm font-medium text-slate-700">
             Username
@@ -36,9 +70,14 @@ export function RegisterPage() {
             id="username"
             type="text"
             autoComplete="username"
+            placeholder="e.g. dhenzel_lima"
             className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
             {...register('username')}
           />
+          <p className="text-xs text-slate-500">
+            This is how people find and @mention you — letters, numbers, and underscores only,
+            not your real name.
+          </p>
           {errors.username && <p className="text-sm text-red-600">{errors.username.message}</p>}
         </div>
 

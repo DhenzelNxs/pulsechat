@@ -349,3 +349,18 @@ the point is an incremental, readable history.
 - README has screenshots/GIF, architecture diagram, and setup instructions a stranger could
   follow.
 - Repo is public.
+
+## 17. Post-MVP cards
+
+Cards 1–16 above are the original MVP. These were opened after the MVP shipped, based on
+feedback using the deployed app — same one-branch-one-PR-per-card workflow.
+
+17. **Fix registration UX** — separate First name / Last name fields from Username (the
+    single field was being mistaken for a full-name field); make the username field's
+    purpose clear up front.
+18. **Show the current logged-in user** in the app shell (sidebar footer).
+19. **Add i18n** — Portuguese (default) and English, with a language switcher.
+20. **Migrate the frontend UI to Material UI** (latest stable release), replacing the
+    hand-rolled Tailwind components.
+21. **Keep the message composer bottom-anchored** with no messages, instead of sitting
+    under the empty-state text.
