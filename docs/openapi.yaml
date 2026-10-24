@@ -1,0 +1,446 @@
+openapi: 3.0.3
+info:
+  title: PulseChat API
+  version: '1.0'
+  description: >
+    Real-time chat API — JWT auth (access + refresh), 1:1/group rooms, cursor-paginated
+    message history, full-text search, read receipts, and Pusher Channels auth for
+    real-time delivery. See /README.md and /docs/SPEC.md for the full project writeup.
+servers:
+  - url: https://pulsechat-api-dhenzelnexxus-projects.vercel.app
+    description: Production
+  - url: http://localhost:4000
+    description: Local development
+
+tags:
+  - name: Auth
+  - name: Users
+  - name: Rooms
+  - name: Messages
+  - name: Pusher
+  - name: Health
+
+paths:
+  /api/health:
+    get:
+      tags: [Health]
+      summary: Health check
+      security: []
+      responses:
+        '200':
+          description: Service is up
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+                  mongo: { type: string, enum: [connected, connecting, disconnected, disconnecting, unknown] }
+                  uptimeSeconds: { type: integer }
+
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Create an account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password]
+              properties:
+                username: { type: string, minLength: 3, maxLength: 30, pattern: '^[a-zA-Z0-9_]+$' }
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8 }
+      responses:
+        '201':
+          description: Account created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { $ref: '#/components/schemas/User' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '409': { $ref: '#/components/responses/Error' }
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Log in
+      description: Sets an httpOnly `refreshToken` cookie (scoped to `/api/auth`) and returns a short-lived access token.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        '200':
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { $ref: '#/components/schemas/User' }
+                  accessToken: { type: string }
+        '401': { $ref: '#/components/responses/Error' }
+
+  /api/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Rotate the access token
+      description: Reads the `refreshToken` cookie set at login.
+      security: []
+      responses:
+        '200':
+          description: New access token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken: { type: string }
+        '401': { $ref: '#/components/responses/Error' }
+
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Log out
+      description: Revokes the stored refresh token hash and clears the cookie.
+      responses:
+        '204': { description: Logged out }
+        '401': { $ref: '#/components/responses/Error' }
+
+  /api/auth/me:
+    get:
+      tags: [Auth]
+      summary: Current user
+      responses:
+        '200':
+          description: The authenticated user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+
+  /api/users/search:
+    get:
+      tags: [Users]
+      summary: Search users by username
+      description: Used to find people to start a DM or add to a group.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 100 }
+      responses:
+        '200':
+          description: Matching users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items: { $ref: '#/components/schemas/User' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Error' }
+
+  /api/rooms:
+    post:
+      tags: [Rooms]
+      summary: Create a DM or group room
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type, memberIds]
+              properties:
+                type: { type: string, enum: [dm, group] }
+                name: { type: string, description: Required for type=group }
+                memberIds:
+                  type: array
+                  description: Other members to add (the caller is added automatically).
+                  items: { type: string }
+      responses:
+        '201':
+          description: Room created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  room: { $ref: '#/components/schemas/Room' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Error' }
+    get:
+      tags: [Rooms]
+      summary: List my rooms
+      description: Sorted by lastMessageAt, most recent first.
+      responses:
+        '200':
+          description: Rooms the caller is a member of
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rooms:
+                    type: array
+                    items: { $ref: '#/components/schemas/Room' }
+        '401': { $ref: '#/components/responses/Error' }
+
+  /api/rooms/{id}:
+    get:
+      tags: [Rooms]
+      summary: Room details
+      parameters: [{ $ref: '#/components/parameters/RoomId' }]
+      responses:
+        '200':
+          description: Room details with populated members
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  room: { $ref: '#/components/schemas/Room' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+
+  /api/rooms/{id}/read:
+    post:
+      tags: [Rooms]
+      summary: Mark a room as read
+      description: Adds the caller's id to `readBy` on every message in the room sent by someone else.
+      parameters: [{ $ref: '#/components/parameters/RoomId' }]
+      responses:
+        '204': { description: Marked as read }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+
+  /api/rooms/{id}/messages:
+    get:
+      tags: [Messages]
+      summary: Paginated message history
+      description: Newest-first, cursor-based. Pass the previous page's `nextCursor` to page backward in time.
+      parameters:
+        - { $ref: '#/components/parameters/RoomId' }
+        - name: cursor
+          in: query
+          schema: { type: string, format: date-time }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        '200':
+          description: A page of messages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messages:
+                    type: array
+                    items: { $ref: '#/components/schemas/Message' }
+                  nextCursor:
+                    type: string
+                    nullable: true
+                    format: date-time
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+    post:
+      tags: [Messages]
+      summary: Send a message
+      description: >
+        Persists the message, resolves @mentions against the room's members, then triggers a
+        `message:new` event on the room's Pusher channel (best-effort — a Pusher failure doesn't
+        fail the request).
+      parameters: [{ $ref: '#/components/parameters/RoomId' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content: { type: string, minLength: 1, maxLength: 10000 }
+      responses:
+        '201':
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { $ref: '#/components/schemas/Message' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+
+  /api/rooms/{id}/messages/search:
+    get:
+      tags: [Messages]
+      summary: Search messages in a room
+      description: Case-insensitive literal substring match against message content, newest first, capped at 50 results.
+      parameters:
+        - { $ref: '#/components/parameters/RoomId' }
+        - name: q
+          in: query
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 200 }
+      responses:
+        '200':
+          description: Matching messages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messages:
+                    type: array
+                    items: { $ref: '#/components/schemas/Message' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+
+  /api/pusher/auth:
+    post:
+      tags: [Pusher]
+      summary: Authorize a Pusher channel subscription
+      description: >
+        Called by the pusher-js client before subscribing. Authorizes `private-room-{roomId}`
+        and `presence-room-{roomId}` for current room members, and `private-user-{userId}` for
+        the caller's own id only.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [socket_id, channel_name]
+              properties:
+                socket_id: { type: string }
+                channel_name: { type: string }
+      responses:
+        '200':
+          description: Channel auth signature
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  auth: { type: string }
+                  channel_data: { type: string, description: Present for presence channels only }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+
+components:
+  parameters:
+    RoomId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Short-lived access token from /api/auth/login or /api/auth/refresh.
+
+  schemas:
+    User:
+      type: object
+      properties:
+        _id: { type: string }
+        username: { type: string }
+        email: { type: string }
+        avatarUrl: { type: string }
+        status: { type: string, enum: [online, offline, away] }
+        lastSeenAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    RoomMember:
+      type: object
+      properties:
+        _id: { type: string }
+        username: { type: string }
+        avatarUrl: { type: string }
+        status: { type: string, enum: [online, offline, away] }
+
+    Room:
+      type: object
+      properties:
+        _id: { type: string }
+        type: { type: string, enum: [dm, group] }
+        name: { type: string }
+        memberIds:
+          type: array
+          items: { $ref: '#/components/schemas/RoomMember' }
+        createdBy: { type: string }
+        lastMessageAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    Message:
+      type: object
+      properties:
+        _id: { type: string }
+        roomId: { type: string }
+        senderId: { type: string }
+        content: { type: string }
+        mentions:
+          type: array
+          items: { type: string }
+          description: User ids resolved from @username mentions in content.
+        readBy:
+          type: array
+          items: { type: string }
+        editedAt: { type: string, format: date-time, nullable: true }
+        deletedAt: { type: string, format: date-time, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string, example: VALIDATION_ERROR }
+            message: { type: string }
+
+  responses:
+    Error:
+      description: Request failed
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    ValidationError:
+      description: Invalid request body or query
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+
+security:
+  - bearerAuth: []
