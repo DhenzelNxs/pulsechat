@@ -15,5 +15,6 @@ export async function list(req: AuthenticatedRequest, res: Response) {
 
 export async function getById(req: AuthenticatedRequest, res: Response) {
   const room = await roomsService.getRoomForUser(req.userId as string, req.params.id as string);
+  await room.populate('memberIds', 'username avatarUrl status');
   res.status(200).json({ room });
 }
