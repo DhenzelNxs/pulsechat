@@ -7,6 +7,7 @@ import { env } from './config/env';
 import { logger } from './config/logger';
 import { healthRouter } from './routes/health.routes';
 import { authRouter } from './modules/auth/auth.routes';
+import { roomsRouter } from './modules/rooms/rooms.routes';
 import { notFound } from './middleware/notFound';
 import { errorHandler } from './middleware/errorHandler';
 
@@ -21,6 +22,7 @@ export function createApp(): Express {
 
   app.use('/api/health', healthRouter);
   app.use('/api/auth', authRouter);
+  app.use('/api/rooms', roomsRouter);
 
   app.use(notFound);
   app.use(errorHandler);
