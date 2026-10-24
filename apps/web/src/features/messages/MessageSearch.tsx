@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMessageSearch } from './useMessageSearch';
 import { highlightMatches } from './highlightMatches';
 
@@ -12,6 +13,7 @@ function jumpToMessage(messageId: string) {
 }
 
 export function MessageSearch({ roomId, onClose }: MessageSearchProps) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const results = useMessageSearch(roomId, query);
 
@@ -22,7 +24,7 @@ export function MessageSearch({ roomId, onClose }: MessageSearchProps) {
           autoFocus
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search in this chat…"
+          placeholder={t('chat.searchInChat')}
           className="flex-1 rounded border border-slate-300 px-3 py-1.5 text-sm focus:border-slate-500 focus:outline-none dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
         />
         <button
@@ -30,16 +32,16 @@ export function MessageSearch({ roomId, onClose }: MessageSearchProps) {
           onClick={onClose}
           className="text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100"
         >
-          Close
+          {t('chat.close')}
         </button>
       </div>
 
       {query.trim() && (
         <div className="mt-2 max-h-48 overflow-y-auto">
-          {results.isLoading && <p className="text-xs text-slate-400">Searching…</p>}
+          {results.isLoading && <p className="text-xs text-slate-400">{t('chat.searching')}</p>}
 
           {results.data?.length === 0 && (
-            <p className="text-xs text-slate-400">No messages match “{query.trim()}”.</p>
+            <p className="text-xs text-slate-400">{t('chat.noResults', { query: query.trim() })}</p>
           )}
 
           {results.data?.map((message) => (

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { User } from '../../api/auth';
 import type { Room } from '../../api/rooms';
 import { displayName } from '../../lib/displayName';
@@ -11,6 +12,7 @@ interface NewChatModalProps {
 }
 
 export function NewChatModal({ onClose, onCreated }: NewChatModalProps) {
+  const { t } = useTranslation();
   const [type, setType] = useState<'dm' | 'group'>('dm');
   const [name, setName] = useState('');
   const [query, setQuery] = useState('');
@@ -54,11 +56,13 @@ export function NewChatModal({ onClose, onCreated }: NewChatModalProps) {
     <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/40 px-4">
       <div className="w-full max-w-sm space-y-4 rounded-lg bg-white p-6 shadow-xl dark:bg-slate-800">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">New chat</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            {t('newChatModal.title')}
+          </h2>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t('newChatModal.close')}
             className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
           >
             ✕
@@ -78,7 +82,7 @@ export function NewChatModal({ onClose, onCreated }: NewChatModalProps) {
                 : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
             }`}
           >
-            Direct message
+            {t('newChatModal.directMessage')}
           </button>
           <button
             type="button"
@@ -89,14 +93,14 @@ export function NewChatModal({ onClose, onCreated }: NewChatModalProps) {
                 : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
             }`}
           >
-            Group
+            {t('newChatModal.group')}
           </button>
         </div>
 
         {type === 'group' && (
           <input
             type="text"
-            placeholder="Group name"
+            placeholder={t('newChatModal.groupNamePlaceholder')}
             value={name}
             onChange={(event) => setName(event.target.value)}
             className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
@@ -118,7 +122,7 @@ export function NewChatModal({ onClose, onCreated }: NewChatModalProps) {
 
         <input
           type="text"
-          placeholder="Search by username"
+          placeholder={t('newChatModal.searchPlaceholder')}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
@@ -143,12 +147,12 @@ export function NewChatModal({ onClose, onCreated }: NewChatModalProps) {
             );
           })}
           {search.isFetched && search.data?.length === 0 && (
-            <p className="px-2 py-1 text-sm text-slate-400">No users found</p>
+            <p className="px-2 py-1 text-sm text-slate-400">{t('newChatModal.noUsersFound')}</p>
           )}
         </div>
 
         {createRoom.isError && (
-          <p className="text-sm text-red-600">Could not create the chat. Try again.</p>
+          <p className="text-sm text-red-600">{t('newChatModal.error')}</p>
         )}
 
         <button
@@ -157,7 +161,7 @@ export function NewChatModal({ onClose, onCreated }: NewChatModalProps) {
           disabled={!canSubmit || createRoom.isPending}
           className="w-full rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
         >
-          {createRoom.isPending ? 'Creating…' : 'Start chat'}
+          {createRoom.isPending ? t('newChatModal.creating') : t('newChatModal.startChat')}
         </button>
       </div>
     </div>

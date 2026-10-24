@@ -1,11 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerSchema, type RegisterInput } from '@pulsechat/shared';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { ApiError } from '../api/client';
 import { useRegister } from '../features/auth/useRegister';
 
 export function RegisterPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const registerAccount = useRegister();
   const {
@@ -26,18 +28,17 @@ export function RegisterPage() {
         onSubmit={handleSubmit(onSubmit)}
         className="w-full max-w-sm space-y-4 rounded-lg bg-white p-8 shadow"
       >
-        <h1 className="text-2xl font-semibold text-slate-900">Create your account</h1>
+        <h1 className="text-2xl font-semibold text-slate-900">{t('auth.register.title')}</h1>
 
         <div className="flex gap-3">
           <div className="flex-1 space-y-1">
             <label htmlFor="firstName" className="block text-sm font-medium text-slate-700">
-              First name
+              {t('auth.register.firstName')}
             </label>
             <input
               id="firstName"
               type="text"
               autoComplete="given-name"
-              placeholder="Dhenzel"
               className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
               {...register('firstName')}
             />
@@ -48,13 +49,12 @@ export function RegisterPage() {
 
           <div className="flex-1 space-y-1">
             <label htmlFor="lastName" className="block text-sm font-medium text-slate-700">
-              Last name
+              {t('auth.register.lastName')}
             </label>
             <input
               id="lastName"
               type="text"
               autoComplete="family-name"
-              placeholder="Ribeiro"
               className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
               {...register('lastName')}
             />
@@ -64,26 +64,23 @@ export function RegisterPage() {
 
         <div className="space-y-1">
           <label htmlFor="username" className="block text-sm font-medium text-slate-700">
-            Username
+            {t('auth.register.username')}
           </label>
           <input
             id="username"
             type="text"
             autoComplete="username"
-            placeholder="e.g. dhenzel_lima"
+            placeholder={t('auth.register.usernamePlaceholder')}
             className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
             {...register('username')}
           />
-          <p className="text-xs text-slate-500">
-            This is how people find and @mention you — letters, numbers, and underscores only,
-            not your real name.
-          </p>
+          <p className="text-xs text-slate-500">{t('auth.register.usernameHelp')}</p>
           {errors.username && <p className="text-sm text-red-600">{errors.username.message}</p>}
         </div>
 
         <div className="space-y-1">
           <label htmlFor="email" className="block text-sm font-medium text-slate-700">
-            Email
+            {t('auth.register.email')}
           </label>
           <input
             id="email"
@@ -97,7 +94,7 @@ export function RegisterPage() {
 
         <div className="space-y-1">
           <label htmlFor="password" className="block text-sm font-medium text-slate-700">
-            Password
+            {t('auth.register.password')}
           </label>
           <input
             id="password"
@@ -113,7 +110,7 @@ export function RegisterPage() {
           <p className="text-sm text-red-600">
             {registerAccount.error instanceof ApiError
               ? registerAccount.error.message
-              : 'Something went wrong'}
+              : t('auth.register.genericError')}
           </p>
         )}
 
@@ -122,13 +119,13 @@ export function RegisterPage() {
           disabled={registerAccount.isPending}
           className="w-full rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
         >
-          {registerAccount.isPending ? 'Creating account…' : 'Create account'}
+          {registerAccount.isPending ? t('auth.register.submitPending') : t('auth.register.submit')}
         </button>
 
         <p className="text-center text-sm text-slate-600">
-          Already have an account?{' '}
+          {t('auth.register.haveAccount')}{' '}
           <Link to="/login" className="font-medium text-slate-900 underline">
-            Log in
+            {t('auth.register.loginLink')}
           </Link>
         </p>
       </form>
