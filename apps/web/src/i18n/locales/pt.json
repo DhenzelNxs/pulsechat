@@ -42,6 +42,8 @@
     "backToChats": "Voltar para as conversas",
     "search": "Pesquisar",
     "hideSearch": "Ocultar pesquisa",
+    "members": "Membros",
+    "groupMembersTitle": "Membros do grupo ({{count}})",
     "online": "Online",
     "offline": "Offline",
     "typingOne": "{{name}} está digitando…",
