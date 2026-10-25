@@ -18,6 +18,7 @@ export interface Room {
   createdBy: string;
   lastMessageAt: string;
   createdAt: string;
+  unreadCount: number;
 }
 
 export interface CreateRoomInput {

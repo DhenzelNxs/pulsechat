@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Room, type RoomDocument } from '../../models/Room';
 import { User } from '../../models/User';
 import { Message } from '../../models/Message';
@@ -29,10 +30,35 @@ export async function createRoom(creatorId: string, input: CreateRoomInput): Pro
   });
 }
 
-export async function listRoomsForUser(userId: string): Promise<RoomDocument[]> {
-  return Room.find({ memberIds: userId })
+export async function listRoomsForUser(userId: string) {
+  const rooms = await Room.find({ memberIds: userId })
     .sort({ lastMessageAt: -1 })
-    .populate('memberIds', 'firstName lastName username avatarUrl status');
+    .populate('memberIds', 'firstName lastName username avatarUrl status')
+    .lean();
+
+  if (rooms.length === 0) {
+    return rooms.map((room) => ({ ...room, unreadCount: 0 }));
+  }
+
+  const unreadCounts = await Message.aggregate<{ _id: mongoose.Types.ObjectId; count: number }>([
+    {
+      $match: {
+        roomId: { $in: rooms.map((room) => room._id) },
+        senderId: { $ne: new mongoose.Types.ObjectId(userId) },
+        readBy: { $ne: new mongoose.Types.ObjectId(userId) },
+      },
+    },
+    { $group: { _id: '$roomId', count: { $sum: 1 } } },
+  ]);
+
+  const unreadCountByRoomId = new Map(
+    unreadCounts.map((entry) => [entry._id.toString(), entry.count]),
+  );
+
+  return rooms.map((room) => ({
+    ...room,
+    unreadCount: unreadCountByRoomId.get(room._id.toString()) ?? 0,
+  }));
 }
 
 export async function getRoomForUser(userId: string, roomId: string): Promise<RoomDocument> {

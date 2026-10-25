@@ -34,6 +34,7 @@
     "chats": "Conversas",
     "newChat": "Nova conversa",
     "noChatsYet": "Nenhuma conversa ainda. Comece uma acima.",
+    "unreadCount": "{{count}} mensagens não lidas",
     "loadingChats": "Carregando conversas…",
     "selectOrStart": "Selecione uma conversa ou inicie uma nova.",
     "loadingChat": "Carregando conversa…",
