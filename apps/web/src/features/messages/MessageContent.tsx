@@ -1,3 +1,4 @@
+import Box from '@mui/material/Box';
 import ReactMarkdown, { defaultUrlTransform, type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
@@ -26,37 +27,57 @@ function withMentionLinks(content: string): string {
 
 const components: Components = {
   p({ children }) {
-    return <p className="whitespace-pre-wrap break-words">{children}</p>;
+    return (
+      <Box component="p" sx={{ m: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+        {children}
+      </Box>
+    );
   },
   a({ href, children }) {
     if (href?.startsWith(MENTION_SCHEME)) {
       return (
-        <span className="rounded bg-sky-500/15 px-1 font-medium text-sky-600 dark:text-sky-400">
+        <Box
+          component="span"
+          sx={{ borderRadius: 1, px: 0.5, fontWeight: 600, bgcolor: 'rgba(14, 165, 233, 0.15)', color: 'info.main' }}
+        >
           {children}
-        </span>
+        </Box>
       );
     }
     return (
-      <a href={href} target="_blank" rel="noreferrer" className="underline">
+      <Box component="a" href={href} target="_blank" rel="noreferrer" sx={{ textDecoration: 'underline' }}>
         {children}
-      </a>
+      </Box>
     );
   },
   code({ className, children }) {
     if (!className) {
       return (
-        <code className="rounded bg-black/10 px-1 py-0.5 font-mono text-[0.85em] dark:bg-white/10">
+        <Box
+          component="code"
+          sx={{
+            borderRadius: 0.5,
+            px: 0.5,
+            py: 0.125,
+            fontFamily: 'monospace',
+            fontSize: '0.85em',
+            bgcolor: 'action.selected',
+          }}
+        >
           {children}
-        </code>
+        </Box>
       );
     }
     return <code className={className}>{children}</code>;
   },
   pre({ children }) {
     return (
-      <pre className="my-1 overflow-x-auto rounded bg-slate-950 p-2 text-xs text-slate-100">
+      <Box
+        component="pre"
+        sx={{ my: 0.5, overflowX: 'auto', borderRadius: 1, p: 1, fontSize: '0.75rem', bgcolor: '#0f172a', color: '#f1f5f9' }}
+      >
         {children}
-      </pre>
+      </Box>
     );
   },
 };

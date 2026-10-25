@@ -1,8 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginInput } from '@pulsechat/shared';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import Alert from '@mui/material/Alert';
+import Link from '@mui/material/Link';
 import { ApiError } from '../api/client';
 import { useLogin } from '../features/auth/useLogin';
 
@@ -13,78 +21,89 @@ export function LoginPage() {
   const justRegistered = Boolean((location.state as { registered?: boolean } | null)?.registered);
   const login = useLogin();
   const {
-    register,
+    control,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: '', password: '' },
+  });
 
   const onSubmit = (input: LoginInput) => {
     login.mutate(input, { onSuccess: () => navigate('/') });
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-sm space-y-4 rounded-lg bg-white p-8 shadow"
-      >
-        <h1 className="text-2xl font-semibold text-slate-900">{t('auth.login.title')}</h1>
+    <Box
+      sx={{
+        display: 'flex',
+        minHeight: '100vh',
+        alignItems: 'center',
+        justifyContent: 'center',
+        px: 2,
+        bgcolor: 'background.default',
+      }}
+    >
+      <Paper component="form" onSubmit={handleSubmit(onSubmit)} elevation={2} sx={{ width: '100%', maxWidth: 400, p: 4 }}>
+        <Stack spacing={2.5}>
+          <Typography variant="h5" sx={{ fontWeight: 600 }}>
+            {t('auth.login.title')}
+          </Typography>
 
-        {justRegistered && (
-          <p className="rounded bg-green-50 px-3 py-2 text-sm text-green-700">
-            {t('auth.login.accountCreated')}
-          </p>
-        )}
+          {justRegistered && <Alert severity="success">{t('auth.login.accountCreated')}</Alert>}
 
-        <div className="space-y-1">
-          <label htmlFor="email" className="block text-sm font-medium text-slate-700">
-            {t('auth.login.email')}
-          </label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
-            {...register('email')}
+          <Controller
+            name="email"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                id="email"
+                label={t('auth.login.email')}
+                type="email"
+                autoComplete="email"
+                fullWidth
+                error={Boolean(errors.email)}
+                helperText={errors.email?.message}
+              />
+            )}
           />
-          {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
-        </div>
 
-        <div className="space-y-1">
-          <label htmlFor="password" className="block text-sm font-medium text-slate-700">
-            {t('auth.login.password')}
-          </label>
-          <input
-            id="password"
-            type="password"
-            autoComplete="current-password"
-            className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
-            {...register('password')}
+          <Controller
+            name="password"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                id="password"
+                label={t('auth.login.password')}
+                type="password"
+                autoComplete="current-password"
+                fullWidth
+                error={Boolean(errors.password)}
+                helperText={errors.password?.message}
+              />
+            )}
           />
-          {errors.password && <p className="text-sm text-red-600">{errors.password.message}</p>}
-        </div>
 
-        {login.isError && (
-          <p className="text-sm text-red-600">
-            {login.error instanceof ApiError ? login.error.message : t('auth.login.genericError')}
-          </p>
-        )}
+          {login.isError && (
+            <Alert severity="error">
+              {login.error instanceof ApiError ? login.error.message : t('auth.login.genericError')}
+            </Alert>
+          )}
 
-        <button
-          type="submit"
-          disabled={login.isPending}
-          className="w-full rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
-        >
-          {login.isPending ? t('auth.login.submitPending') : t('auth.login.submit')}
-        </button>
+          <Button type="submit" variant="contained" size="large" fullWidth disabled={login.isPending}>
+            {login.isPending ? t('auth.login.submitPending') : t('auth.login.submit')}
+          </Button>
 
-        <p className="text-center text-sm text-slate-600">
-          {t('auth.login.noAccount')}{' '}
-          <Link to="/register" className="font-medium text-slate-900 underline">
-            {t('auth.login.registerLink')}
-          </Link>
-        </p>
-      </form>
-    </div>
+          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+            {t('auth.login.noAccount')}{' '}
+            <Link component={RouterLink} to="/register" underline="hover" sx={{ fontWeight: 600 }}>
+              {t('auth.login.registerLink')}
+            </Link>
+          </Typography>
+        </Stack>
+      </Paper>
+    </Box>
   );
 }

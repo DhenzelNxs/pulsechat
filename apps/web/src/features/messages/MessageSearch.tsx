@@ -1,5 +1,13 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+import List from '@mui/material/List';
+import ListItemButton from '@mui/material/ListItemButton';
+import Typography from '@mui/material/Typography';
 import { useMessageSearch } from './useMessageSearch';
 import { highlightMatches } from './highlightMatches';
 
@@ -18,44 +26,46 @@ export function MessageSearch({ roomId, onClose }: MessageSearchProps) {
   const results = useMessageSearch(roomId, query);
 
   return (
-    <div className="border-b border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-900">
-      <div className="flex items-center gap-2">
-        <input
+    <Box sx={{ p: 1.5, borderBottom: 1, borderColor: 'divider', bgcolor: 'action.hover' }}>
+      <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+        <TextField
           autoFocus
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder={t('chat.searchInChat')}
-          className="flex-1 rounded border border-slate-300 px-3 py-1.5 text-sm focus:border-slate-500 focus:outline-none dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+          size="small"
+          fullWidth
         />
-        <button
-          type="button"
-          onClick={onClose}
-          className="text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100"
-        >
-          {t('chat.close')}
-        </button>
-      </div>
+        <IconButton size="small" onClick={onClose} aria-label={t('chat.close')}>
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      </Stack>
 
       {query.trim() && (
-        <div className="mt-2 max-h-48 overflow-y-auto">
-          {results.isLoading && <p className="text-xs text-slate-400">{t('chat.searching')}</p>}
-
-          {results.data?.length === 0 && (
-            <p className="text-xs text-slate-400">{t('chat.noResults', { query: query.trim() })}</p>
+        <Box sx={{ mt: 1, maxHeight: 192, overflowY: 'auto' }}>
+          {results.isLoading && (
+            <Typography variant="caption" color="text.secondary">
+              {t('chat.searching')}
+            </Typography>
           )}
 
-          {results.data?.map((message) => (
-            <button
-              key={message._id}
-              type="button"
-              onClick={() => jumpToMessage(message._id)}
-              className="block w-full rounded px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-            >
-              {highlightMatches(message.content, query)}
-            </button>
-          ))}
-        </div>
+          {results.data?.length === 0 && (
+            <Typography variant="caption" color="text.secondary">
+              {t('chat.noResults', { query: query.trim() })}
+            </Typography>
+          )}
+
+          <List disablePadding dense>
+            {results.data?.map((message) => (
+              <ListItemButton key={message._id} onClick={() => jumpToMessage(message._id)}>
+                <Typography variant="body2" noWrap>
+                  {highlightMatches(message.content, query)}
+                </Typography>
+              </ListItemButton>
+            ))}
+          </List>
+        </Box>
       )}
-    </div>
+    </Box>
   );
 }

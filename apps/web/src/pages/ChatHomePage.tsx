@@ -1,11 +1,13 @@
 import { useTranslation } from 'react-i18next';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 
 export function ChatHomePage() {
   const { t } = useTranslation();
 
   return (
-    <div className="flex h-full items-center justify-center text-slate-400">
-      <p>{t('chat.selectOrStart')}</p>
-    </div>
+    <Box sx={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
+      <Typography color="text.secondary">{t('chat.selectOrStart')}</Typography>
+    </Box>
   );
 }
