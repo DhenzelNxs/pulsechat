@@ -14,6 +14,7 @@ import { useSession } from '../features/auth/useSession';
 import { useRoom } from '../features/rooms/useRoom';
 import { roomDisplayName } from '../features/rooms/roomDisplayName';
 import { GroupMembersDialog } from '../features/rooms/GroupMembersDialog';
+import { RoomAvatar } from '../features/rooms/RoomAvatar';
 import { MessageList } from '../features/messages/MessageList';
 import { MessageInput } from '../features/messages/MessageInput';
 import { MessageSearch } from '../features/messages/MessageSearch';
@@ -70,7 +71,8 @@ export function RoomPage() {
         >
           <ArrowBackIcon fontSize="small" />
         </IconButton>
-        <Stack direction="row" spacing={1} sx={{ flex: 1, minWidth: 0, alignItems: 'center' }}>
+        <Stack direction="row" spacing={1.5} sx={{ flex: 1, minWidth: 0, alignItems: 'center' }}>
+          <RoomAvatar room={room.data} currentUserId={user?._id} size={32} />
           <Typography variant="subtitle1" noWrap sx={{ fontWeight: 600 }}>
             {roomDisplayName(room.data, user?._id)}
           </Typography>
