@@ -2,9 +2,10 @@
 
 Real-time chat application with JWT authentication, built as a full-stack engineering
 showcase rather than a tutorial clone — real-time messaging over Pusher Channels, typing
-indicators, presence, cursor-paginated infinite scroll, read receipts, markdown with
-syntax-highlighted code blocks, `@mention` highlighting, message search with `<mark>`
-highlighting, and integration tests run against a real MongoDB engine.
+indicators, presence, cursor-paginated infinite scroll, read receipts with an unread-count
+badge per chat, markdown with syntax-highlighted code blocks, `@mention` highlighting,
+message search with `<mark>` highlighting, a Material UI interface with light/dark themes,
+Portuguese/English i18n, and integration tests run against a real MongoDB engine.
 
 **Live demo:** https://pulsechat-web-dhenzelnexxus-projects.vercel.app
 **API:** https://pulsechat-api-dhenzelnexxus-projects.vercel.app
@@ -17,6 +18,12 @@ highlighting, and integration tests run against a real MongoDB engine.
 > against placeholder Pusher credentials (no paid/verified Pusher account was set up for
 > this portfolio build). Everything else — auth, rooms, messages, search, read receipts —
 > runs against a real MongoDB Atlas cluster in production. See [Known limitations](#known-limitations).
+
+## Screenshots
+
+| Light mode | Dark mode |
+| --- | --- |
+| ![Light mode chat](docs/screenshot-light.jpg) | ![Dark mode chat](docs/screenshot-dark.jpg) |
 
 ## Architecture
 
@@ -32,7 +39,7 @@ WebSocket event never causes data loss, just a client that re-syncs on reconnect
 
 | Layer               | Choice                                                                                   |
 | ------------------- | ---------------------------------------------------------------------------------------- |
-| Frontend            | Vite, React, TypeScript, Tailwind CSS, TanStack Query, React Hook Form + Zod             |
+| Frontend            | Vite, React, TypeScript, Material UI (MUI), TanStack Query, React Hook Form + Zod, react-i18next |
 | Real-time client    | pusher-js                                                                                |
 | API                 | Node.js, Express, TypeScript, Mongoose                                                   |
 | Auth                | JWT (access + refresh) + bcrypt                                                          |
@@ -112,10 +119,12 @@ apps/
 packages/
   shared/  # Zod schemas + types shared by web and api
 docs/
-  SPEC.md        # full technical spec and the 16-card work breakdown
+  SPEC.md        # full technical spec and the card-by-card work breakdown
   openapi.yaml   # API reference
   architecture.svg
   demo.gif
+  screenshot-light.jpg
+  screenshot-dark.jpg
 ```
 
 See [`docs/SPEC.md`](docs/SPEC.md) §4 for the detailed structure and §15 for how the
