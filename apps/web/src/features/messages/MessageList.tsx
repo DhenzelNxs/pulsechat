@@ -61,17 +61,21 @@ export function MessageList({ roomId, otherMemberId }: MessageListProps) {
 
   if (messages.isLoading) {
     return (
-      <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
-        {t('chat.loadingMessages')}
-      </Typography>
+      <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Typography variant="body2" color="text.secondary">
+          {t('chat.loadingMessages')}
+        </Typography>
+      </Box>
     );
   }
 
   if (ordered.length === 0) {
     return (
-      <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
-        {t('chat.noMessagesYet')}
-      </Typography>
+      <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Typography variant="body2" color="text.secondary">
+          {t('chat.noMessagesYet')}
+        </Typography>
+      </Box>
     );
   }
 
