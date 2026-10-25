@@ -78,6 +78,13 @@ export async function sendMessage(
     logger.error({ err: error, roomId }, 'Failed to publish message:new to Pusher');
   }
 
+  try {
+    const memberChannels = room.memberIds.map((memberId) => `private-user-${memberId.toString()}`);
+    await pusher.trigger(memberChannels, 'room:updated', { roomId });
+  } catch (error) {
+    logger.error({ err: error, roomId }, 'Failed to publish room:updated to Pusher');
+  }
+
   return message;
 }
 

@@ -119,6 +119,56 @@ describe('GET /api/rooms', () => {
     expect(ids).toContain(roomWithBob.body.room._id);
     expect(ids).not.toContain(bobCarolRoom.body.room._id);
   });
+
+  it('includes an unread count of messages from other members', async () => {
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
+
+    const room = await request(app)
+      .post('/api/rooms')
+      .set(authed(alice.accessToken))
+      .send({ type: 'dm', memberIds: [bob.userId] });
+
+    await request(app)
+      .post(`/api/rooms/${room.body.room._id}/messages`)
+      .set(authed(alice.accessToken))
+      .send({ content: 'first' });
+    await request(app)
+      .post(`/api/rooms/${room.body.room._id}/messages`)
+      .set(authed(alice.accessToken))
+      .send({ content: 'second' });
+
+    const bobRes = await request(app).get('/api/rooms').set(authed(bob.accessToken));
+    const bobRoom = bobRes.body.rooms.find((r: { _id: string }) => r._id === room.body.room._id);
+    expect(bobRoom.unreadCount).toBe(2);
+
+    const aliceRes = await request(app).get('/api/rooms').set(authed(alice.accessToken));
+    const aliceRoom = aliceRes.body.rooms.find((r: { _id: string }) => r._id === room.body.room._id);
+    expect(aliceRoom.unreadCount).toBe(0);
+  });
+
+  it('clears the unread count after marking the room read', async () => {
+    const alice = await registerAndLogin(app, 'alice');
+    const bob = await registerAndLogin(app, 'bob');
+
+    const room = await request(app)
+      .post('/api/rooms')
+      .set(authed(alice.accessToken))
+      .send({ type: 'dm', memberIds: [bob.userId] });
+
+    await request(app)
+      .post(`/api/rooms/${room.body.room._id}/messages`)
+      .set(authed(alice.accessToken))
+      .send({ content: 'hey bob' });
+
+    await request(app)
+      .post(`/api/rooms/${room.body.room._id}/read`)
+      .set(authed(bob.accessToken));
+
+    const res = await request(app).get('/api/rooms').set(authed(bob.accessToken));
+    const bobRoom = res.body.rooms.find((r: { _id: string }) => r._id === room.body.room._id);
+    expect(bobRoom.unreadCount).toBe(0);
+  });
 });
 
 describe('GET /api/rooms/:id', () => {
@@ -205,6 +255,12 @@ describe('messages', () => {
       `private-room-${room.body.room._id}`,
       'message:new',
       expect.objectContaining({ content: 'hey bob' }),
+    );
+
+    expect(pusher.trigger).toHaveBeenCalledWith(
+      expect.arrayContaining([`private-user-${alice.userId}`, `private-user-${bob.userId}`]),
+      'room:updated',
+      { roomId: room.body.room._id },
     );
   });
 

@@ -8,6 +8,7 @@ import Button from '@mui/material/Button';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
+import Chip from '@mui/material/Chip';
 import AddIcon from '@mui/icons-material/Add';
 import { useSession } from '../auth/useSession';
 import { useRooms } from './useRooms';
@@ -55,6 +56,15 @@ export function RoomList() {
             return (
               <ListItemButton key={room._id} component={Link} to={`/rooms/${room._id}`} selected={isActive} divider>
                 <ListItemText slotProps={{ primary: { noWrap: true } }} primary={roomDisplayName(room, user?._id)} />
+                {room.unreadCount > 0 && (
+                  <Chip
+                    label={room.unreadCount > 99 ? '99+' : room.unreadCount}
+                    color="primary"
+                    size="small"
+                    aria-label={t('chat.unreadCount', { count: room.unreadCount })}
+                    sx={{ ml: 1, height: 20, minWidth: 20, fontSize: '0.7rem', flexShrink: 0 }}
+                  />
+                )}
               </ListItemButton>
             );
           })}

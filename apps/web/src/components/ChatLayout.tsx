@@ -11,6 +11,7 @@ import { ThemeToggle } from './ThemeToggle';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { useLogout } from '../features/auth/useLogout';
 import { useSession } from '../features/auth/useSession';
+import { useUserChannel } from '../features/realtime/useUserChannel';
 import { displayName, initials } from '../lib/displayName';
 
 export function ChatLayout() {
@@ -20,6 +21,7 @@ export function ChatLayout() {
   const navigate = useNavigate();
   const logout = useLogout();
   const { data: currentUser } = useSession();
+  useUserChannel();
 
   const handleLogout = () => {
     logout.mutate(undefined, { onSuccess: () => navigate('/login') });

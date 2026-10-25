@@ -34,6 +34,7 @@
     "chats": "Chats",
     "newChat": "New chat",
     "noChatsYet": "No chats yet. Start one above.",
+    "unreadCount": "{{count}} unread messages",
     "loadingChats": "Loading chats…",
     "selectOrStart": "Select a chat or start a new one.",
     "loadingChat": "Loading chat…",

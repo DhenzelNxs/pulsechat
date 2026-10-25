@@ -185,7 +185,7 @@ Indexes: `messages` → `{ roomId: 1, createdAt: -1 }` for cursor pagination; `r
 | `private-room-{roomId}` | private | `message:new`, `message:edited`, `message:deleted` |
 | `presence-room-{roomId}` | presence | member_added/member_removed (built-in) → drives online dots |
 | `private-room-{roomId}` | private | `typing:start`, `typing:stop` |
-| `private-user-{userId}` | private | `notification:mention` |
+| `private-user-{userId}` | private | `notification:mention`, `room:updated` |
 
 The client triggers client events for typing (`client-typing:start/stop`, enabled on the Pusher
 app) to avoid a round trip through the API for something this ephemeral; everything that must be
