@@ -7,12 +7,14 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemText from '@mui/material/ListItemText';
 import Chip from '@mui/material/Chip';
 import AddIcon from '@mui/icons-material/Add';
 import { useSession } from '../auth/useSession';
 import { useRooms } from './useRooms';
 import { roomDisplayName } from './roomDisplayName';
+import { RoomAvatar } from './RoomAvatar';
 import { NewChatModal } from './NewChatModal';
 
 export function RoomList() {
@@ -55,6 +57,9 @@ export function RoomList() {
             const isActive = location.pathname === `/rooms/${room._id}`;
             return (
               <ListItemButton key={room._id} component={Link} to={`/rooms/${room._id}`} selected={isActive} divider>
+                <ListItemAvatar>
+                  <RoomAvatar room={room} currentUserId={user?._id} />
+                </ListItemAvatar>
                 <ListItemText slotProps={{ primary: { noWrap: true } }} primary={roomDisplayName(room, user?._id)} />
                 {room.unreadCount > 0 && (
                   <Chip
