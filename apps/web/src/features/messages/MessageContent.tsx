@@ -38,7 +38,14 @@ const components: Components = {
       return (
         <Box
           component="span"
-          sx={{ borderRadius: 1, px: 0.5, fontWeight: 600, bgcolor: 'rgba(14, 165, 233, 0.15)', color: 'info.main' }}
+          sx={{
+            borderRadius: 1,
+            px: 0.5,
+            fontWeight: 700,
+            textDecoration: 'underline',
+            bgcolor: 'rgba(127, 127, 127, 0.25)',
+            color: 'inherit',
+          }}
         >
           {children}
         </Box>
