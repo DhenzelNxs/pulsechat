@@ -9,9 +9,11 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SearchIcon from '@mui/icons-material/Search';
+import GroupIcon from '@mui/icons-material/Group';
 import { useSession } from '../features/auth/useSession';
 import { useRoom } from '../features/rooms/useRoom';
 import { roomDisplayName } from '../features/rooms/roomDisplayName';
+import { GroupMembersDialog } from '../features/rooms/GroupMembersDialog';
 import { MessageList } from '../features/messages/MessageList';
 import { MessageInput } from '../features/messages/MessageInput';
 import { MessageSearch } from '../features/messages/MessageSearch';
@@ -34,6 +36,7 @@ export function RoomPage() {
   const room = useRoom(roomId);
   const { onlineUserIds, typingUsers, notifyTyping, stopTyping } = useRoomChannel(roomId);
   const [showSearch, setShowSearch] = useState(false);
+  const [showMembers, setShowMembers] = useState(false);
 
   if (room.isLoading) {
     return (
@@ -85,6 +88,13 @@ export function RoomPage() {
             />
           )}
         </Stack>
+        {room.data.type === 'group' && (
+          <Tooltip title={t('chat.members')}>
+            <IconButton size="small" aria-label={t('chat.members')} onClick={() => setShowMembers(true)}>
+              <GroupIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
         <Tooltip title={showSearch ? t('chat.hideSearch') : t('chat.search')}>
           <IconButton
             size="small"
@@ -95,6 +105,9 @@ export function RoomPage() {
           </IconButton>
         </Tooltip>
       </Stack>
+      {showMembers && (
+        <GroupMembersDialog members={room.data.memberIds} onClose={() => setShowMembers(false)} />
+      )}
       {showSearch && <MessageSearch roomId={roomId} onClose={() => setShowSearch(false)} />}
       <MessageList roomId={roomId} otherMemberId={otherMember?._id} />
       {typingUsers.length > 0 && (

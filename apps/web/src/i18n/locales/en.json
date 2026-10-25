@@ -42,6 +42,8 @@
     "backToChats": "Back to chats",
     "search": "Search",
     "hideSearch": "Hide search",
+    "members": "Members",
+    "groupMembersTitle": "Group members ({{count}})",
     "online": "Online",
     "offline": "Offline",
     "typingOne": "{{name}} is typing…",
