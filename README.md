@@ -14,11 +14,6 @@ Portuguese/English i18n, and integration tests run against a real MongoDB engine
 
 ![PulseChat demo](docs/demo.gif)
 
-> Real-time delivery over Pusher isn't live on the hosted demo above — it's running
-> against placeholder Pusher credentials (no paid/verified Pusher account was set up for
-> this portfolio build). Everything else — auth, rooms, messages, search, read receipts —
-> runs against a real MongoDB Atlas cluster in production. See [Known limitations](#known-limitations).
-
 ## Screenshots
 
 | Light mode | Dark mode |
@@ -132,11 +127,6 @@ project was built card-by-card, one PR per card.
 
 ## Known limitations
 
-- **No real Pusher account**: the deployed app uses placeholder Pusher credentials, so
-  real-time delivery, typing indicators, and presence don't actually push live on the
-  hosted demo — everything that goes through the REST API works normally. Plugging in a
-  real Pusher app's credentials (see [Local development](#local-development)) makes it
-  fully live with no code changes.
 - **Message edit/delete, emoji reactions, file attachments, and PWA/push notifications**
   are stretch goals noted in [`docs/SPEC.md`](docs/SPEC.md) §8 and were out of scope for
   the MVP build.
